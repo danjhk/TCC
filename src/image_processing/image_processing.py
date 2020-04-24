@@ -18,6 +18,7 @@ from typing import List, Dict
 # Third-party imports
 # -------------------
 import cv2
+from google.colab.patches import cv2_imshow
 
 def count_video_frames(video_cap):
     """ Conta a quantidade de frames de um video
