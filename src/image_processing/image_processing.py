@@ -18,9 +18,8 @@ from typing import List, Dict
 # Third-party imports
 # -------------------
 import cv2
-from google.colab.patches import cv2_imshow
 
-def count_video_frames(video_cap):
+def count_frames(video_cap):
     """ Conta a quantidade de frames de um video
 
     Args:
@@ -29,7 +28,7 @@ def count_video_frames(video_cap):
     @return num_frames: inteiro contendo a quantidade de frames
 
     Examples:
-        >>> count_video_frames(video_cap)
+        >>> count_frames(video_cap)
         '84'
     """
     cap = video_cap
@@ -39,7 +38,7 @@ def count_video_frames(video_cap):
         num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         return num_frames
 
-def show_video_frames(video_cap):
+def show_frames(video_cap):
     """ Mostra o conteúdo de um conjunto de frames ao usuário
 
     Args:
@@ -48,7 +47,7 @@ def show_video_frames(video_cap):
     @return None
     
     Examples:
-        >>> show_video_frames(video_cap)
+        >>> show_frames(video_cap)
     """
     
     cap = video_cap
@@ -66,7 +65,7 @@ def show_video_frames(video_cap):
     # Fecha todos os frames
     cv2.destroyAllWindows()
 
-def stack_video_frames(video_cap, frames_per_stack):
+def stack_frames(video_cap, frames_per_stack):
     """ Agrupa os frames de um vídeo em listas que contém uma 
     quantidade de "frames_per_stack" de frames
 
@@ -78,7 +77,7 @@ def stack_video_frames(video_cap, frames_per_stack):
         correspondendo aos frames de um vídeo
     
     Examples:
-        >>> stack_video_frames(video_cap, 9)
+        >>> stack_frames(video_cap, 9)
     """
     
     frames_list = []
@@ -103,26 +102,22 @@ def stack_video_frames(video_cap, frames_per_stack):
       last_frame_of_nth_stack += 1
     return stacked_frames_list
 
-def preprocess(stacked_frames_list, scale):
-    """ Essa função realiza o pré-processamento para um conjunto de frames. 
-    Especificamente, reduz a escala dos frames e subtrai o seu background.
-    <br>
+def scaling(stacked_frames_list, scale):
+    """ Essa função realiza reduz a escala dos frames por um fator determinado.
     Args:
-        stacked_frames_list: uma lista de imagens, correspondendo
+        stacked_frames_list(list of images): uma lista de imagens, correspondendo
             aos frames de um vídeo
-        scale: inteiro que indica a escala a ser aplicada no redimensionamento
+        scale(int): inteiro que indica a escala a ser aplicada no redimensionamento
             dos frames. Ex: 2, para escalar a imagem para a metade do tamanho original
-
-    @return stack_list: lista de imagens, com os frames na escala
-        especificada e com foreground extraído
+    Retorno:
+        stack_list(list of images): uma lista de imagens, com os frames na escala
+            especificada
     """
 
     stack_list = [] # lista para armazenar os frames processados
 
     for stacked_frames in stacked_frames_list: # itera para cada stack de frames
-      backSub = cv2.createBackgroundSubtractorMOG2(detectShadows = False,
-                                                varThreshold = 5) # Gaussian mixture model para
-                                                                        # extração do background
+
       frame_list = [] # lista para armazenar os frames pré-processados
 
       for frame in stacked_frames: # itera para cada frame dentro do stack
@@ -131,18 +126,42 @@ def preprocess(stacked_frames_list, scale):
         dim = (int(height/scale), int(width/scale))
         resize = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA) # downsampling
 
-        fgMask = backSub.apply(resize) # aplica o foregorund extractor
+        frame_list.append(resize) # adiciona o frame no stack
+
+      stack_list.append(frame_list) # adiciona o stack na lista
+    return stack_list
+    
+def background_subtraction(stacked_frames_list):
+    """ Essa função realiza a subtração do fundo de uma lista de imagens.
+    Args:
+        stacked_frames_list(list of images): uma lista de imagens, correspondendo
+          aos frames de um vídeo
+    Retorno:
+        stack_list(list of images): uma lista de imagens, com os frame com fundo
+          extraído
+    """
+
+    stack_list = [] # lista para armazenar os frames processados
+
+    backSub = cv2.createBackgroundSubtractorMOG2(detectShadows = False,
+                                                varThreshold = 5) # Gaussian mixture model para
+                                                                        # extração do background
+    for stacked_frames in stacked_frames_list: # itera para cada stack de frames
+    
+      frame_list = [] # lista para armazenar os frames pré-processados
+
+      for frame in stacked_frames: # itera para cada frame dentro do stack
+
+        fgMask = backSub.apply(frame) # aplica o foregorund extractor
         fgMask3 = cv2.cvtColor(fgMask, cv2.COLOR_GRAY2RGB) # transforma máscara p 3 canais RGB
 
         new_frame = cv2.bitwise_and(resize, fgMask3) # aplica operador lógico AND bit a bit (pixel a pixel)
 
-        cv2_imshow(fgMask3) # máscara
-        cv2_imshow(new_frame) # frame reduzido e com máscara aplicada
         frame_list.append(new_frame) # adiciona o frame no stack
 
       stack_list.append(frame_list) # adiciona o stack na lista
     
-    return stack_list
+    return stack_list    
 
 def grayscale(stacked_frames_list):
     """ Esta função recebe uma lista com frames empilhados e retorna listas 
@@ -171,7 +190,7 @@ def compute_gradient(stacked_frames_list):
             na direção X dos frames contidos em stacked_frames_list
         stacked_gradient_y: uma lista de listas, contendo o gradiente
             na direção Y dos contidos em stacked_frames_list
-    <br>
+
     """
     stacked_gradient_x = [[cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) \
                            for frame in stacked_frames] \
