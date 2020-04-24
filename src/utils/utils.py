@@ -20,7 +20,7 @@ from typing import List, Dict
 import cv2
 import glob
 
-def initialize_weizmann():
+def get_weizmann_filepaths():
     """ Obtém um dicionário de dicionários referentes ao dataset Weizmann 
     como descrito em get_filepaths
 
@@ -33,7 +33,7 @@ def initialize_weizmann():
     actions_list_weiz = create_actions_list(path_weiz, person_weiz)    
     return(get_filepaths(path_weiz, names_list_weiz, actions_list_weiz))
 
-def initialize_kth():
+def get_kth_filepaths():
     """ Obtém um dicionário de dicionários referentes ao dataset KTH 
     como descrito em get_filepaths
 
