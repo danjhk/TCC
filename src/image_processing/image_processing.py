@@ -5,15 +5,6 @@
 @date Date: 2020-04-17
 
 @verbatim
-Funções presente no módulo: 
-
-count_frames        Conta a quantidade de frames de um vídeo
-show_frames         Mostra o conteúdo de um vídeo ao usuário
-frame_stacker       Agrupa os frames de um vídeo em listas
-preprocess          Reduz a escala dos frames e subtrai o seu background
-grayscale           Retorna frames em tons de cinza
-compute_gradient    Calcula os gradientes na direção X e Y de frames
-optical_flow        Calcula os fluxos ópticos na direção X e Y de frames
 @endverbatim 
 '''
 
@@ -28,7 +19,7 @@ from typing import List, Dict
 # -------------------
 import cv2
 
-def count_frames(video_cap):
+def count_video_frames(video_cap):
     """ Conta a quantidade de frames de um video
 
     Args:
@@ -47,7 +38,7 @@ def count_frames(video_cap):
         num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         return num_frames
 
-def show_frames(video_cap):
+def show_video_frames(video_cap):
     """ Mostra o conteúdo de um conjunto de frames ao usuário
 
     Args:
@@ -74,7 +65,7 @@ def show_frames(video_cap):
     # Fecha todos os frames
     cv2.destroyAllWindows()
 
-def frame_stacker(video_cap, frames_per_stack):
+def stack_video_frames(video_cap, frames_per_stack):
     """ Agrupa os frames de um vídeo em listas que contém uma 
     quantidade de "frames_per_stack" de frames
 
@@ -175,23 +166,23 @@ def compute_gradient(stacked_frames_list):
         stacked_frames_list: uma lista de imagens, correspondendo aos frames de um vídeo
     
     Multiple return: 
-        stacked_gradient_x_list: uma lista de listas, contendo o gradiente
-            na direção X dos frames contidos em stacked_Frames_list
-        stacked_gradient_y_list: uma lista de listas, contendo o gradiente
-            na direção Y dos contidos em stacked_Frames_list
+        stacked_gradient_x: uma lista de listas, contendo o gradiente
+            na direção X dos frames contidos em stacked_frames_list
+        stacked_gradient_y: uma lista de listas, contendo o gradiente
+            na direção Y dos contidos em stacked_frames_list
+    <br>
     """
-    stacked_gradient_x_list = [[cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) \
-                                for frame in stacked_frames] \
-                                for stacked_frames in stacked_frames_list]  
-    stacked_gradient_y_list = [[cv2.Sobel(frame,cv2.CV_64F,0,1,ksize=5) \
-                                for frame in stacked_frames] \
-                                for stacked_frames in stacked_frames_list]
-    return stacked_gradient_x_list, stacked_gradient_y_list
+    stacked_gradient_x = [[cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) \
+                           for frame in stacked_frames] \
+                           for stacked_frames in stacked_frames_list]  
+    stacked_gradient_y = [[cv2.Sobel(frame,cv2.CV_64F,0,1,ksize=5) \
+                           for frame in stacked_frames] \
+                           for stacked_frames in stacked_frames_list]
+    return stacked_gradient_x, stacked_gradient_y
 
 def optical_flow(stacked_frames_list):
-    """ Esta função recebe uma lista com frames empilhados e
-    retorna listas contendo os frames agrupados em
-    stacks, com seus fluxos ópticos na direção X e Y
+    """ Esta função recebe uma lista com frames empilhados e retorna listas contendo 
+    os frames agrupados em stacks, com seus fluxos ópticos na direção X e Y
 
     Args:
         stacked_frames_list: uma lista de imagens, correspondendo

@@ -1,19 +1,10 @@
-''' Contém métodos de uso geral
+''' Implementa funções de uso geral
 @package utils
 
 @author Daniel Kim & Igor Nakamura
 @date Date: 2020-04-17
 
 @verbatim
-Funções presente no módulo: 
-
-initialize_weizmann  Obtém os caminhos dos arquivos de vídeo do dataset Weizmann 
-initialize_kth       Obtém os caminhos dos arquivos de vídeo do dataset KTH
-create_actions_list  Obtém a lista de ações referentes a um dataset específico
-create_names_list    Obtém a lista dos nomes das pessoas que executam as ações
-get_filepaths        Obtém os caminhos para os arquivos de video de um dataset
-get_person_filepaths Obtém os caminhos dos arquivos referentes a uma pessoa
-
 @endverbatim 
 '''
 
