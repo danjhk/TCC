@@ -28,7 +28,7 @@ def count_video_frames(video_cap):
     @return num_frames: inteiro contendo a quantidade de frames
 
     Examples:
-        >>> count_frames(video_cap)
+        >>> count_video_frames(video_cap)
         '84'
     """
     cap = video_cap
@@ -47,7 +47,7 @@ def show_video_frames(video_cap):
     @return None
     
     Examples:
-        >>> show_frames(video_cap)
+        >>> show_video_frames(video_cap)
     """
     
     cap = video_cap
@@ -77,7 +77,7 @@ def stack_video_frames(video_cap, frames_per_stack):
         correspondendo aos frames de um vídeo
     
     Examples:
-        >>> frame_stacker(video_cap, 9)
+        >>> stack_video_frames(video_cap, 9)
     """
     
     frames_list = []
