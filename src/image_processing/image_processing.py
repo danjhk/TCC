@@ -65,30 +65,20 @@ def show_frames(video_cap):
     # Fecha todos os frames
     cv2.destroyAllWindows()
 
-def stack_frames(video_cap, frames_per_stack):
+def stack_frames(frames_list, frames_per_stack):
     """ Agrupa os frames de um vídeo em listas que contém uma 
     quantidade de "frames_per_stack" de frames
 
     Args:
-        video_cap: sequência de frames a ser agrupada
+        frames_list: sequência de frames a ser agrupada
         frames_per_stack: quantidade de frames por lista
     
     @return stacked_frames_list: lista de listas de imagens, 
         correspondendo aos frames de um vídeo
     
     Examples:
-        >>> stack_frames(video_cap, 9)
-    """
-    
-    frames_list = []
-    while(video_cap.isOpened()):
-    # Captura frame por frame
-      ret, frame = video_cap.read()
-      if ret == True:
-        frames_list.append(frame)    
-      else: 
-        break
-        
+        >>> stack_frames(frames_list, 9)
+    """        
     num_frames = len(frames_list)
     num_stacks = num_frames - frames_per_stack + 1
     first_frame_of_nth_stack = 0
@@ -105,13 +95,16 @@ def stack_frames(video_cap, frames_per_stack):
 def scaling(frames_list, scale):
     """ Essa função realiza reduz a escala dos frames por um fator determinado.
     Args:
-        frames_list(list of images): uma lista de imagens, correspondendo
+        frames_list: uma lista de imagens, correspondendo
             aos frames de um vídeo
-        scale(int): inteiro que indica a escala a ser aplicada no redimensionamento
+        scale: inteiro que indica a escala a ser aplicada no redimensionamento
             dos frames. Ex: 2, para escalar a imagem para a metade do tamanho original
     @return:
         frames_list(list of images): uma lista de imagens, com os frames na escala
             especificada
+            
+    Examples:
+        >>> scaling(frames_list, 2)
     """
     i = 0 # contador
 
@@ -130,16 +123,18 @@ def background_subtraction(video_cap, lr, thr, hist_len):
     """ Essa função realiza a subtração do fundo de um vídeo, e retorna
         uma lista de imagens correspondendo ao frames do mesmo.
     Args:
-        video_cap (VideoCapture): sequência de frames
-        lr(float): um número decimal que representa a taxa de aprendizado
+        video_cap: sequência de frames
+        lr: um número decimal que representa a taxa de aprendizado
           do algoritmo de subtração
-        thr(int): um número inteiro que representa o limiar para definir a distância
+        thr: um número inteiro que representa o limiar para definir a distância
           máxima ao qual um pixel ainda é considerado como pertencente ao fundo
-        hist_len(int): um número inteiro que representa o histórico de frames considerados
+        hist_len: um número inteiro que representa o histórico de frames considerados
           para o background model
     @return:
-        stack_list(list of images): uma lista de imagens, com os frame com fundo
+        stack_list: uma lista de imagens, contendo os frames com fundo
           extraído
+    Examples:
+        >>> background_subtraction(video_cap, lr = 0.85, thr = 24, hist_len = 15)
     """
 
     frame_list = [] # lista para armazenar os frames processados
@@ -183,26 +178,29 @@ def background_subtraction(video_cap, lr, thr, hist_len):
         break
     return frame_list
 
-def grayscale(frames_list):
-    """ Esta função recebe uma lista de frames e
+def grayscale(stacked_frames_list):
+    """ Esta função recebe uma lista de frames empilhados e
         retorna uma lista contendo os frames em tons de cinza
     Args:
-        frames_list(list of images): uma lista de imagens, correspondendo
+        stacked_frames_list: uma lista de imagens empilhadas, correspondendo
             aos frames de um vídeo
         
     @return:
-        frames_grayscale(list of images): uma lista de imagens, com os frames em escalas de cinza
+        frames_grayscale: uma lista de imagens, com os frames em escalas de cinza
     """    
-    grayscale = [cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY) \
-                            for frame in frames_list]
-    return grayscale   
+    stacked_grayscale = [[cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY) \
+                            for frame in stacked_frames] \
+                             for stacked_frames in stacked_frames_list]
+        
+    return stacked_grayscale
 
-def compute_gradient(frames_list):
+def compute_gradient(stacked_frames_list):
     """ Esta função recebe uma lista com frames e retorna 
     uma lista contendo os frames com seus gradientes na direção X e Y
     
     Args:
-        frames_list: uma lista de imagens, correspondendo aos frames de um vídeo
+        stacked_frames_list: uma lista de imagens, correspondendo os frames
+            empilhados de um vídeo
     
     Multiple return: 
         stacked_gradient_x: uma lista de imagens, contendo o gradiente
@@ -211,19 +209,21 @@ def compute_gradient(frames_list):
             na direção Y dos frames contidos em frames_list
 
     """
-    gradient_x = [cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) \
-                           for frame in frames_list]  
-    gradient_y = [cv2.Sobel(frame,cv2.CV_64F,0,1,ksize=5) \
-                           for frame in frames_list]
-    return gradient_x, gradient_y
+    stacked_gradient_x_list = [[cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) \
+                                for frame in stacked_frames] \
+                                for stacked_frames in stacked_frames_list]  
+    stacked_gradient_y_list = [[cv2.Sobel(frame,cv2.CV_64F,0,1,ksize=5) \
+                                for frame in stacked_frames] \
+                                for stacked_frames in stacked_frames_list]
+    return stacked_gradient_x_list, stacked_gradient_y_list
 
-def optical_flow(frames_list):
-    """ Esta função recebe uma lista com frames e retorna lista contendo 
+def optical_flow(stacked_frames_listframes_list):
+    """ Esta função recebe uma lista com frames empilhados e retorna lista contendo 
     os frames com seus fluxos ópticos na direção X e Y
 
     Args:
-        frames_list: uma lista de imagens, correspondendo
-            aos frames de um vídeo
+        stacked_frames_list: uma lista de imagens, correspondendo
+            aos frames empilhados de um vídeo
         
     Multiple return:
         opt_x_frames: uma lista de imagens, contendo o fluxo óptico
