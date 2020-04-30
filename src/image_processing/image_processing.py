@@ -102,174 +102,199 @@ def stack_frames(video_cap, frames_per_stack):
       last_frame_of_nth_stack += 1
     return stacked_frames_list
 
-def scaling(stacked_frames_list, scale):
+def scaling(frames_list, scale):
     """ Essa função realiza reduz a escala dos frames por um fator determinado.
     Args:
-        stacked_frames_list(list of images): uma lista de imagens, correspondendo
+        frames_list(list of images): uma lista de imagens, correspondendo
             aos frames de um vídeo
         scale(int): inteiro que indica a escala a ser aplicada no redimensionamento
             dos frames. Ex: 2, para escalar a imagem para a metade do tamanho original
-    Retorno:
-        stack_list(list of images): uma lista de imagens, com os frames na escala
+    @return:
+        frames_list(list of images): uma lista de imagens, com os frames na escala
             especificada
     """
+    i = 0 # contador
 
-    stack_list = [] # lista para armazenar os frames processados
+    for frame in frames_list: # itera para cada frame
+      
+      height , width, channels =  frame.shape
+      dim = (int(height/scale), int(width/scale))
+      resize = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA) # downsampling
 
-    for stacked_frames in stacked_frames_list: # itera para cada stack de frames
+      frames_list[i] = frame # adiciona o frame no stack
 
-      frame_list = [] # lista para armazenar os frames pré-processados
-
-      for frame in stacked_frames: # itera para cada frame dentro do stack
-
-        height , width, channels =  frame.shape
-        dim = (int(height/scale), int(width/scale))
-        resize = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA) # downsampling
-
-        frame_list.append(resize) # adiciona o frame no stack
-
-      stack_list.append(frame_list) # adiciona o stack na lista
-    return stack_list
+      i+= 1 # atualiza contador
+    return frames_list
     
-def background_subtraction(stacked_frames_list):
-    """ Essa função realiza a subtração do fundo de uma lista de imagens.
+def background_subtraction(video_cap, lr, thr, hist_len):
+    """ Essa função realiza a subtração do fundo de um vídeo, e retorna
+        uma lista de imagens correspondendo ao frames do mesmo.
     Args:
-        stacked_frames_list(list of images): uma lista de imagens, correspondendo
-          aos frames de um vídeo
-    Retorno:
+        video_cap (VideoCapture): sequência de frames
+        lr(float): um número decimal que representa a taxa de aprendizado
+          do algoritmo de subtração
+        thr(int): um número inteiro que representa o limiar para definir a distância
+          máxima ao qual um pixel ainda é considerado como pertencente ao fundo
+        hist_len(int): um número inteiro que representa o histórico de frames considerados
+          para o background model
+    @return:
         stack_list(list of images): uma lista de imagens, com os frame com fundo
           extraído
     """
 
-    stack_list = [] # lista para armazenar os frames processados
+    frame_list = [] # lista para armazenar os frames processados
 
     backSub = cv2.createBackgroundSubtractorMOG2(detectShadows = False,
-                                                varThreshold = 5) # Gaussian mixture model para
+                                                varThreshold = thr, history = hist_len) # Gaussian mixture model para
                                                                         # extração do background
-    for stacked_frames in stacked_frames_list: # itera para cada stack de frames
-    
-      frame_list = [] # lista para armazenar os frames pré-processados
+    width = video_cap.get(3)
+    height = int(video_cap.get(4))
+    horizontal_disp = int(width/4)
+    n = 1
 
-      for frame in stacked_frames: # itera para cada frame dentro do stack
+    while(video_cap.isOpened()):
+    # Captura frame por frame
+      ret, frame = video_cap.read()
+      if ret:
 
-        fgMask = backSub.apply(frame) # aplica o foregorund extractor
-        fgMask3 = cv2.cvtColor(fgMask, cv2.COLOR_GRAY2RGB) # transforma máscara p 3 canais RGB
+        fgMask = backSub.apply(frame, learningRate = lr) # aplica o foregorund extractor
+#        fgMask3 = cv2.cvtColor(fgMask, cv2.COLOR_GRAY2RGB) # transforma máscara p 3 canais RGB
 
-        new_frame = cv2.bitwise_and(resize, fgMask3) # aplica operador lógico AND bit a bit (pixel a pixel)
+#        new_frame = cv2.bitwise_and(frame, fgMask3) # aplica operador lógico AND bit a bit (pixel a pixel)
 
-        frame_list.append(new_frame) # adiciona o frame no stack
+        lbl = label(fgMask)
+        props = regionprops(lbl)
 
-      stack_list.append(frame_list) # adiciona o stack na lista
-    
-    return stack_list    
+        max = 0
+        for i in range(len(props)):
+          if (props[i].area > max) and (props[i].area > 40):
+            max = props[i].area
+            row = int(props[i].centroid[1])
 
-def grayscale(stacked_frames_list):
-    """ Esta função recebe uma lista com frames empilhados e retorna listas 
-    contendo os frames agrupados em stacks, em tons de cinza
+        mask = np.zeros(frame.shape, dtype=np.uint8)
+        mask[0:height,row-horizontal_disp:row+horizontal_disp] = 255
+        new_frame = cv2.bitwise_and(frame, mask) # aplica operador lógico AND bit a bit (pixel a pixel)
+        #cv2_imshow(fgMask3) # máscara
+        #cv2_imshow(new_frame) # frame reduzido e com máscara aplicada
+        if n >= 15: # a partir do 15° frame
+          frame_list.append(new_frame) # adiciona o frame no stack
+        n += 1
+      else: 
+        break
+    return frame_list
 
+def grayscale(frames_list):
+    """ Esta função recebe uma lista de frames e
+        retorna uma lista contendo os frames em tons de cinza
     Args:
-        stacked_frames_list: uma lista de imagens, correspondendo
+        frames_list(list of images): uma lista de imagens, correspondendo
             aos frames de um vídeo
         
-    @return stack_grayscale: lista de imagens, com os frames em escalas de cinza
+    @return:
+        frames_grayscale(list of images): uma lista de imagens, com os frames em escalas de cinza
     """    
-    stacked_grayscale = [[cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY) \
-                            for frame in stacked_frames] \
-                            for stacked_frames in stacked_frames_list]      
+    grayscale = [cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY) \
+                            for frame in frames_list]
+    return grayscale   
 
-def compute_gradient(stacked_frames_list):
-    """ Esta função recebe uma lista com frames empilhados e retorna 
-    listas contendo os frames agrupados em stacks, com seus 
-    gradientes na direção X e Y
+def compute_gradient(frames_list):
+    """ Esta função recebe uma lista com frames e retorna 
+    uma lista contendo os frames com seus gradientes na direção X e Y
     
     Args:
-        stacked_frames_list: uma lista de imagens, correspondendo aos frames de um vídeo
+        frames_list: uma lista de imagens, correspondendo aos frames de um vídeo
     
     Multiple return: 
-        stacked_gradient_x: uma lista de listas, contendo o gradiente
-            na direção X dos frames contidos em stacked_frames_list
-        stacked_gradient_y: uma lista de listas, contendo o gradiente
-            na direção Y dos contidos em stacked_frames_list
+        stacked_gradient_x: uma lista de imagens, contendo o gradiente
+            na direção X dos frames contidos em frames_list
+        stacked_gradient_y: uma lista de imagens, contendo o gradiente
+            na direção Y dos frames contidos em frames_list
 
     """
-    stacked_gradient_x = [[cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) \
-                           for frame in stacked_frames] \
-                           for stacked_frames in stacked_frames_list]  
-    stacked_gradient_y = [[cv2.Sobel(frame,cv2.CV_64F,0,1,ksize=5) \
-                           for frame in stacked_frames] \
-                           for stacked_frames in stacked_frames_list]
-    return stacked_gradient_x, stacked_gradient_y
+    gradient_x = [cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) \
+                           for frame in frames_list]  
+    gradient_y = [cv2.Sobel(frame,cv2.CV_64F,0,1,ksize=5) \
+                           for frame in frames_list]
+    return gradient_x, gradient_y
 
-def optical_flow(stacked_frames_list):
-    """ Esta função recebe uma lista com frames empilhados e retorna listas contendo 
-    os frames agrupados em stacks, com seus fluxos ópticos na direção X e Y
+def optical_flow(frames_list):
+    """ Esta função recebe uma lista com frames e retorna lista contendo 
+    os frames com seus fluxos ópticos na direção X e Y
 
     Args:
-        stacked_frames_list: uma lista de imagens, correspondendo
+        frames_list: uma lista de imagens, correspondendo
             aos frames de um vídeo
         
     Multiple return:
-        stacked_optical_x: uma lista de listas, contendo a posição X
-            do fluxo óptico para cada frame
-        stacked_optical_y: uma lista de listas, contendo a posição Y
-            do fluxo óptico para cada frame
+        opt_x_frames: uma lista de imagens, contendo o fluxo óptico
+            na direção X, para cada frame
+        opt_y_frames: uma lista de imagens, contendo o fluxo óptico
+            na direção Y, para cada frame
     """    
     corner_detect_params = dict( maxCorners = 100,
-                        qualityLevel = 0.3,
+                        qualityLevel = 0.2,
                         minDistance = 7,
                         blockSize = 7 )
     lk_params = dict( winSize  = (15,15),
                     maxLevel = 0,
-                    criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.03))
+                    criteria = (cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 10, 0.015))
+                                                                # (type, max_count, epsilon)
+    # listas para armazenar os frames com fluxo óptico
+    opt_x_frames = []
+    opt_y_frames = []
     
-    stacked_optical_x, stacked_optical_y = []
-
-
-    prev_frame = cv2.cvtColor(stacked_frames_list[0][0], cv2.COLOR_RGB2GRAY)
+    # inicializando parâmetros
+    prev_frame = cv2.cvtColor(frames_list[0], cv2.COLOR_RGB2GRAY)
+    opt_flow_x = np.zeros_like(prev_frame)
+    opt_flow_y = np.zeros_like(prev_frame)
     p0 = cv2.goodFeaturesToTrack(prev_frame, mask = None, **corner_detect_params)
-
-    x = []
-    y = []
-
-    # primeiro stack
-    for i in range(len(stacked_frames_list[0]-1)):
-      frame = cv2.cvtColor(stacked_frames_list[0][i+1])
-
-      p1, st, err = cv2.calcOpticalFlowPyrLK(prev_frame, frame, p0, None, **lk_params)
-      
-      good_new = p1[st==1] # Select good points
-
-      x_new, y_new = p1.ravel()
-
-      x.append(x_new)
-      y.append(y_new)
-      
-      prev_frame = frame.copy()
-      p0 = good_new.reshape(-1,1,2)
-
     
-    stacked_optical_x.append(x)
-    stacked_optical_y.append(y)
+    # variáveis auxiliares
+    opt_x = [[] for x in range(len(p0))]
+    opt_y = [[] for x in range(len(p0))]
+    x_initial = [0 for x in range(len(p0))]
+    y_initial = [0 for x in range(len(p0))]
 
-    # stacks restantes
-    for i in range(1, len(stacked_frames_list)):
-      x = []
-      y = []
-      for stacked_frames in stacked_frames_list[i]:
-        frame = cv2.cvtColor(stacked_frames_list[0][i+1])
+    for i in range(1, len(frames_list)):
+      frame = cv2.cvtColor(frames_list[i], cv2.COLOR_RGB2GRAY)
+      cp_frame = frame.copy()
+      p1, st, err = cv2.calcOpticalFlowPyrLK(prev_frame, frame, p0, None, **lk_params)
+      p0r, _st, _err = cv2.calcOpticalFlowPyrLK(frame, prev_frame, p1, None, **lk_params) # backward check
+      d = abs(p0-p0r).reshape(-1,2).max(-1)
+      good_pts = d < 1 # pontos correspondentes com distância pequena após backward check
 
-        p1, st, err = cv2.calcOpticalFlowPyrLK(prev_frame, frame, p0, None, **lk_params)
+      tracks = []
+      n = 0
       
-        good_new = p1[st==1] # Select good points
+      for (x_i, y_i), good in zip(p1[st==1].reshape(-1, 2), good_pts):
+        if not good: # usa apenas pontos bons
+          continue
 
-        x_new, y_new = p1.ravel()
+        if i == 1: # 2o frame/1a iteração
+          x_initial[n] = x_i
+          y_initial[n] = y_i
 
-        x.append(x_new)
-        y.append(y_new)
+        opt_x[n].append((x_i, y_initial[n]))
+        opt_y[n].append((x_initial[n], y_i))
+        tracks.append((x_i,y_i))
 
-        prev_frame = frame.copy()
-        p0 = good_new.reshape(-1,1,2)
+        # cv2.circle(cp_frame, (x_i, y_i), 2, (255, 255, 255), -1) #visualizar o resultado do tracking
+        cv2.circle(opt_flow_x, (x_i, y_initial[n]), 2, (255, 255, 255), -1)
+        cv2.circle(opt_flow_y, (x_initial[n], y_i), 2, (255, 255, 255), -1)
+        
+        n+=1
 
-      stacked_optical_x.append(x)
-      stacked_optical_y.append(y)
+      cv2.polylines(opt_flow_x, [np.int32(x) for x in opt_x], False, (255, 255, 255))
+      cv2.polylines(opt_flow_y, [np.int32(y) for y in opt_y], False, (255, 255, 255))
+      
+      opt_x_frames.append(opt_flow_x)
+      opt_y_frames.append(opt_flow_y)
+      #opt_x_frames.append(cp_frame)
 
+      opt_flow_x = np.zeros_like(prev_frame)
+      opt_flow_y = np.zeros_like(prev_frame)
+
+      prev_frame = frame.copy()
+      p0 = np.float32([tr for tr in tracks]).reshape(-1,1,2)
+      
+    return opt_x_frames, opt_y_frames
