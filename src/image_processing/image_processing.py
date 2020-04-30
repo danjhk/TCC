@@ -65,6 +65,7 @@ def show_frames(video_cap):
     # Fecha todos os frames
     cv2.destroyAllWindows()
 
+
 def stack_frames(frames_list, frames_per_stack):
     """ Agrupa os frames de um vídeo em listas que contém uma 
     quantidade de "frames_per_stack" de frames
@@ -118,12 +119,30 @@ def scaling(frames_list, scale):
 
       i+= 1 # atualiza contador
     return frames_list
+
+def video2list(video_cap):
+    """ Essa função converte um objeto de vídeo para uma lista de frames
+    Args:
+        video_cap: sequência de frames de um vídeo
+    @return:
+        frames_list: lista contendo os frames do vídeo
+    Examples:
+        >>> video2list(video_cap)
+    """
     
-def background_subtraction(video_cap, lr, thr, hist_len):
+    frame_list = []
+    while(video_cap.isOpened()):
+    # Captura frame por frame
+      ret, frame = video_cap.read()
+      if ret:
+        frame_list.append(frame)
+    return frame_list
+ 
+def background_subtraction(frame_list, lr, thr, hist_len):
     """ Essa função realiza a subtração do fundo de um vídeo, e retorna
         uma lista de imagens correspondendo ao frames do mesmo.
     Args:
-        video_cap: sequência de frames
+        frame_list: lista contendo uma sequência de frames
         lr: um número decimal que representa a taxa de aprendizado
           do algoritmo de subtração
         thr: um número inteiro que representa o limiar para definir a distância
@@ -137,43 +156,35 @@ def background_subtraction(video_cap, lr, thr, hist_len):
         >>> background_subtraction(video_cap, lr = 0.85, thr = 24, hist_len = 15)
     """
 
-    frame_list = [] # lista para armazenar os frames processados
-
     backSub = cv2.createBackgroundSubtractorMOG2(detectShadows = False,
                                                 varThreshold = thr, history = hist_len) # Gaussian mixture model para
                                                                         # extração do background
-    width = video_cap.get(3)
-    height = int(video_cap.get(4))
+    height, width = int(frame_list[0].shape)
     horizontal_disp = int(width/4)
     n = 1
+    
+    for frame in frame_list:
+      fgMask = backSub.apply(frame, learningRate = lr) # aplica o foregorund extractor
+#      fgMask3 = cv2.cvtColor(fgMask, cv2.COLOR_GRAY2RGB) # transforma máscara p 3 canais RGB
 
-    while(video_cap.isOpened()):
-    # Captura frame por frame
-      ret, frame = video_cap.read()
-      if ret:
+#      new_frame = cv2.bitwise_and(frame, fgMask3) # aplica operador lógico AND bit a bit (pixel a pixel)
+      lbl = label(fgMask)
+      props = regionprops(lbl)
 
-        fgMask = backSub.apply(frame, learningRate = lr) # aplica o foregorund extractor
-#        fgMask3 = cv2.cvtColor(fgMask, cv2.COLOR_GRAY2RGB) # transforma máscara p 3 canais RGB
+      max = 0
+      for i in range(len(props)):
+        if (props[i].area > max) and (props[i].area > 40):
+          max = props[i].area
+          row = int(props[i].centroid[1])
 
-#        new_frame = cv2.bitwise_and(frame, fgMask3) # aplica operador lógico AND bit a bit (pixel a pixel)
-
-        lbl = label(fgMask)
-        props = regionprops(lbl)
-
-        max = 0
-        for i in range(len(props)):
-          if (props[i].area > max) and (props[i].area > 40):
-            max = props[i].area
-            row = int(props[i].centroid[1])
-
-        mask = np.zeros(frame.shape, dtype=np.uint8)
-        mask[0:height,row-horizontal_disp:row+horizontal_disp] = 255
-        new_frame = cv2.bitwise_and(frame, mask) # aplica operador lógico AND bit a bit (pixel a pixel)
-        #cv2_imshow(fgMask3) # máscara
-        #cv2_imshow(new_frame) # frame reduzido e com máscara aplicada
-        if n >= 15: # a partir do 15° frame
-          frame_list.append(new_frame) # adiciona o frame no stack
-        n += 1
+      mask = np.zeros(frame.shape, dtype=np.uint8)
+      mask[0:height,row-horizontal_disp:row+horizontal_disp] = 255
+      new_frame = cv2.bitwise_and(frame, mask) # aplica operador lógico AND bit a bit (pixel a pixel)
+      #cv2_imshow(fgMask3) # máscara
+      #cv2_imshow(new_frame) # frame reduzido e com máscara aplicada
+      if n >= 15: # a partir do 15° frame
+        frame_list.append(new_frame) # adiciona o frame no stack
+      n += 1
       else: 
         break
     return frame_list
