@@ -185,23 +185,22 @@ def background_subtraction(frame_list, lr, thr, hist_len):
       if n >= 15: # a partir do 15° frame
         frame_list.append(new_frame) # adiciona o frame no stack
       n += 1
-      else: 
-        break
     return frame_list
 
-def grayscale(stacked_frames_list):
-    """ Esta função recebe uma lista de frames empilhados e
+def grayscale(frames_list):
+    """ Esta função recebe uma lista de frames e
         retorna uma lista contendo os frames em tons de cinza
     Args:
-        stacked_frames_list: uma lista de imagens empilhadas, correspondendo
+        stacked_frames_list: uma lista de imagens, correspondendo
             aos frames de um vídeo
         
     @return:
         frames_grayscale: uma lista de imagens, com os frames em escalas de cinza
+    Examples:
+        >>> grayscale(frames_list)
     """    
-    stacked_grayscale = [[cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY) \
-                            for frame in stacked_frames] \
-                             for stacked_frames in stacked_frames_list]
+    stacked_grayscale = [cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY) \
+                            for frame in frames_list] 
         
     return stacked_grayscale
 
