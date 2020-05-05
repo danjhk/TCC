@@ -88,10 +88,10 @@ def stack_frames(frames_list, frames_per_stack):
     stacked_frames_list = []
 
     for n in range(num_stacks): # n representa o enésimo stack
-      stacked_frames_list.append(
-          frames_list[first_frame_of_nth_stack:last_frame_of_nth_stack])
-      first_frame_of_nth_stack += 1
-      last_frame_of_nth_stack += 1
+        stacked_frames_list.append(
+            frames_list[first_frame_of_nth_stack:last_frame_of_nth_stack])
+        first_frame_of_nth_stack += 1
+        last_frame_of_nth_stack += 1
     return stacked_frames_list
 
 def scaling(frames_list, scale):
@@ -112,13 +112,13 @@ def scaling(frames_list, scale):
 
     for frame in frames_list: # itera para cada frame
       
-      height , width, channels =  frame.shape
-      dim = (int(height/scale), int(width/scale))
-      resize = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA) # downsampling
+        height , width, channels =  frame.shape
+        dim = (int(height/scale), int(width/scale))
+        resize = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA) # downsampling
 
-      frames_list[i] = frame # adiciona o frame no stack
+        frames_list[i] = frame # adiciona o frame no stack
 
-      i+= 1 # atualiza contador
+        i+= 1 # atualiza contador
     return frames_list
 
 def video2list(video_cap):
@@ -134,9 +134,9 @@ def video2list(video_cap):
     frame_list = []
     while(video_cap.isOpened()):
     # Captura frame por frame
-      ret, frame = video_cap.read()
-      if ret:
-        frame_list.append(frame)
+        ret, frame = video_cap.read()
+        if ret:
+            frame_list.append(frame)
     return frame_list
  
 def background_subtraction(frame_list, lr, thr, hist_len):
@@ -165,27 +165,27 @@ def background_subtraction(frame_list, lr, thr, hist_len):
     n = 1
     
     for frame in frame_list:
-      fgMask = backSub.apply(frame, learningRate = lr) # aplica o foregorund extractor
-#      fgMask3 = cv2.cvtColor(fgMask, cv2.COLOR_GRAY2RGB) # transforma máscara p 3 canais RGB
+        fgMask = backSub.apply(frame, learningRate = lr) # aplica o foregorund extractor
+    #     fgMask3 = cv2.cvtColor(fgMask, cv2.COLOR_GRAY2RGB) # transforma máscara p 3 canais RGB
 
-#      new_frame = cv2.bitwise_and(frame, fgMask3) # aplica operador lógico AND bit a bit (pixel a pixel)
-      lbl = label(fgMask)
-      props = regionprops(lbl)
+    #     new_frame = cv2.bitwise_and(frame, fgMask3) # aplica operador lógico AND bit a bit (pixel a pixel)
+        lbl = label(fgMask)
+        props = regionprops(lbl)
 
-      max = 0
-      for i in range(len(props)):
-        if (props[i].area > max) and (props[i].area > 40):
-          max = props[i].area
-          row = int(props[i].centroid[1])
+        max = 0
+        for i in range(len(props)):
+            if (props[i].area > max) and (props[i].area > 40):
+            max = props[i].area
+            row = int(props[i].centroid[1])
 
-      mask = np.zeros(frame.shape, dtype=np.uint8)
-      mask[0:height,row-horizontal_disp:row+horizontal_disp] = 255
-      new_frame = cv2.bitwise_and(frame, mask) # aplica operador lógico AND bit a bit (pixel a pixel)
-      #cv2_imshow(fgMask3) # máscara
-      #cv2_imshow(new_frame) # frame reduzido e com máscara aplicada
-      if n >= 15: # a partir do 15° frame
-        frame_list.append(new_frame) # adiciona o frame no stack
-      n += 1
+        mask = np.zeros(frame.shape, dtype=np.uint8)
+        mask[0:height,row-horizontal_disp:row+horizontal_disp] = 255
+        new_frame = cv2.bitwise_and(frame, mask) # aplica operador lógico AND bit a bit (pixel a pixel)
+        #cv2_imshow(fgMask3) # máscara
+        #cv2_imshow(new_frame) # frame reduzido e com máscara aplicada
+        if n >= 15: # a partir do 15° frame
+            frame_list.append(new_frame) # adiciona o frame no stack
+        n += 1
     return frame_list
 
 def grayscale(frames_list):
@@ -228,7 +228,7 @@ def compute_gradient(stacked_frames_list):
                                 for stacked_frames in stacked_frames_list]
     return stacked_gradient_x_list, stacked_gradient_y_list
 
-def optical_flow(stacked_frames_listframes_list):
+def optical_flow(stacked_frames_list):
     """ Esta função recebe uma lista com frames empilhados e retorna lista contendo 
     os frames com seus fluxos ópticos na direção X e Y
 
@@ -267,47 +267,47 @@ def optical_flow(stacked_frames_listframes_list):
     y_initial = [0 for x in range(len(p0))]
 
     for i in range(1, len(frames_list)):
-      cp_frame = frame.copy()
-      p1, st, err = cv2.calcOpticalFlowPyrLK(prev_frame, frame, p0, None, **lk_params)
-      p0r, _st, _err = cv2.calcOpticalFlowPyrLK(frame, prev_frame, p1, None, **lk_params) # backward check
-      d = abs(p0-p0r).reshape(-1,2).max(-1)
-      good_pts = d < 1 # pontos correspondentes com distância pequena após backward check
+        cp_frame = frame.copy()
+        p1, st, err = cv2.calcOpticalFlowPyrLK(prev_frame, frame, p0, None, **lk_params)
+        p0r, _st, _err = cv2.calcOpticalFlowPyrLK(frame, prev_frame, p1, None, **lk_params) # backward check
+        d = abs(p0-p0r).reshape(-1,2).max(-1)
+        good_pts = d < 1 # pontos correspondentes com distância pequena após backward check
 
-      tracks = []
-      n = 0
+        tracks = []
+        n = 0
       
-      for (x_i, y_i), good in zip(p1[st==1].reshape(-1, 2), good_pts):
-        if not good: # usa apenas pontos bons
-          continue
+        for (x_i, y_i), good in zip(p1[st==1].reshape(-1, 2), good_pts):
+            if not good: # usa apenas pontos bons
+            continue
 
-        if i == 1: # 2o frame/1a iteração
-          x_initial[n] = x_i
-          y_initial[n] = y_i
+            if i == 1: # 2o frame/1a iteração
+            x_initial[n] = x_i
+            y_initial[n] = y_i
 
-        opt_x[n].append((x_i, y_initial[n]))
-        opt_y[n].append((x_initial[n], y_i))
-        tracks.append((x_i,y_i))
+            opt_x[n].append((x_i, y_initial[n]))
+            opt_y[n].append((x_initial[n], y_i))
+            tracks.append((x_i,y_i))
 
-        # cv2.circle(cp_frame, (x_i, y_i), 2, (255, 255, 255), -1) #visualizar o resultado do tracking
-        cv2.circle(opt_flow_x, (x_i, y_initial[n]), 2, (255, 255, 255), -1)
-        cv2.circle(opt_flow_y, (x_initial[n], y_i), 2, (255, 255, 255), -1)
+            # cv2.circle(cp_frame, (x_i, y_i), 2, (255, 255, 255), -1) #visualizar o resultado do tracking
+            cv2.circle(opt_flow_x, (x_i, y_initial[n]), 2, (255, 255, 255), -1)
+            cv2.circle(opt_flow_y, (x_initial[n], y_i), 2, (255, 255, 255), -1)
+            
+            n+=1
+            
+        # desenha a linha do fluxo óptico
+        cv2.polylines(opt_flow_x, [np.int32(x) for x in opt_x], False, (255, 255, 255))
+        cv2.polylines(opt_flow_y, [np.int32(y) for y in opt_y], False, (255, 255, 255))
         
-        n+=1
+        # armazena os frames com o fluxo óptico
+        opt_x_frames.append(opt_flow_x)
+        opt_y_frames.append(opt_flow_y)
+        #opt_x_frames.append(cp_frame)
         
-      # desenha a linha do fluxo óptico
-      cv2.polylines(opt_flow_x, [np.int32(x) for x in opt_x], False, (255, 255, 255))
-      cv2.polylines(opt_flow_y, [np.int32(y) for y in opt_y], False, (255, 255, 255))
-      
-      # armazena os frames com o fluxo óptico
-      opt_x_frames.append(opt_flow_x)
-      opt_y_frames.append(opt_flow_y)
-      #opt_x_frames.append(cp_frame)
-      
-      # reinicializa a matriz de fluxo óptico para o próximo frame
-      opt_flow_x = np.zeros_like(prev_frame)
-      opt_flow_y = np.zeros_like(prev_frame)
-      
-      prev_frame = frame.copy()
-      p0 = np.float32([tr for tr in tracks]).reshape(-1,1,2)
+        # reinicializa a matriz de fluxo óptico para o próximo frame
+        opt_flow_x = np.zeros_like(prev_frame)
+        opt_flow_y = np.zeros_like(prev_frame)
+        
+        prev_frame = frame.copy()
+        p0 = np.float32([tr for tr in tracks]).reshape(-1,1,2)
       
     return opt_x_frames, opt_y_frames
