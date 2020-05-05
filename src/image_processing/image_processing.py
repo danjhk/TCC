@@ -139,8 +139,8 @@ def video2list(video_cap):
             frame_list.append(frame)
     return frame_list
  
-def background_subtraction(frame_list, lr, thr, hist_len):
-    """ Essa função realiza a subtração do fundo de um vídeo, e retorna
+def foreground_extraction(frame_list, lr, thr, hist_len):
+    """ Essa função realiza a extração do plano frontal de um vídeo, e retorna
         uma lista de imagens correspondendo ao frames do mesmo.
     Args:
         frame_list: lista contendo uma sequência de frames
@@ -151,10 +151,10 @@ def background_subtraction(frame_list, lr, thr, hist_len):
         hist_len: um número inteiro que representa o histórico de frames considerados
           para o background model
     @return:
-        stack_list: uma lista de imagens, contendo os frames com fundo
+        stack_list: uma lista de imagens, contendo os frames com o plano frontal
           extraído
     Examples:
-        >>> background_subtraction(video_cap, lr = 0.85, thr = 24, hist_len = 15)
+        >>> foreground_extraction(video_cap, lr = 0.85, thr = 24, hist_len = 15)
     """
 
     backSub = cv2.createBackgroundSubtractorMOG2(detectShadows = False,
@@ -175,8 +175,8 @@ def background_subtraction(frame_list, lr, thr, hist_len):
         max = 0
         for i in range(len(props)):
             if (props[i].area > max) and (props[i].area > 40):
-            max = props[i].area
-            row = int(props[i].centroid[1])
+                max = props[i].area
+                row = int(props[i].centroid[1])
 
         mask = np.zeros(frame.shape, dtype=np.uint8)
         mask[0:height,row-horizontal_disp:row+horizontal_disp] = 255
