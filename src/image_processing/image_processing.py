@@ -206,28 +206,26 @@ def grayscale(frames_list):
         
     return stacked_grayscale
 
-def compute_gradient(stacked_frames_list):
+def compute_gradient(frames_list):
     """ Esta função recebe uma lista com frames e retorna 
     uma lista contendo os frames com seus gradientes na direção X e Y
     
     Args:
-        stacked_frames_list: uma lista de imagens, correspondendo os frames
+        frames_list: uma lista de imagens, correspondendo os frames
             empilhados de um vídeo
     
     Multiple return: 
-        stacked_gradient_x: uma lista de imagens, contendo o gradiente
+        gradient_x_list: uma lista de imagens, contendo o gradiente
             na direção X dos frames contidos em frames_list
-        stacked_gradient_y: uma lista de imagens, contendo o gradiente
+        gradient_y_list: uma lista de imagens, contendo o gradiente
             na direção Y dos frames contidos em frames_list
 
     """
-    stacked_gradient_x_list = [[cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) \
-                                for frame in stacked_frames] \
-                                for stacked_frames in stacked_frames_list]  
-    stacked_gradient_y_list = [[cv2.Sobel(frame,cv2.CV_64F,0,1,ksize=5) \
-                                for frame in stacked_frames] \
-                                for stacked_frames in stacked_frames_list]
-    return stacked_gradient_x_list, stacked_gradient_y_list
+    gradient_x_list = [[cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) \
+                        for frame in frames_list]] 
+    gradient_y_list = [[cv2.Sobel(frame,cv2.CV_64F,0,1,ksize=5) \
+                        for frame in stacked_frames]]
+    return gradient_x_list, gradient_y_list
 
 def optical_flow(stacked_frames_list):
     """ Esta função recebe uma lista com frames empilhados e retorna lista contendo 
