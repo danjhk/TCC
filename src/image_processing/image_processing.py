@@ -103,24 +103,22 @@ def scaling(frames_list, scale):
         scale: inteiro que indica a escala a ser aplicada no redimensionamento
             dos frames. Ex: 2, para escalar a imagem para a metade do tamanho original
     @return:
-        frames_list(list of images): uma lista de imagens, com os frames na escala
+        updated_list(list of images): uma lista de imagens, com os frames na escala
             especificada
             
     Examples:
         >>> scaling(frames_list, 2)
     """
-    i = 0 # contador
-
+    height , width, channels =  frames_list[0].shape
+    dim = (int(height/scale), int(width/scale))
+    updated_list = []
+    
     for frame in frames_list: # itera para cada frame
       
-        height , width, channels =  frame.shape
-        dim = (int(height/scale), int(width/scale))
-        resize = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA) # downsampling
+        res = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA) # downsampling
 
-        frames_list[i] = resize # adiciona o frame no stack
-
-        i+= 1 # atualiza contador
-    return frames_list
+        updated_list.append(res)# adiciona o frame no stack
+    return updated_list
 
 def video2list(video_cap):
     """ Essa função converte um objeto de vídeo para uma lista de frames
@@ -152,7 +150,7 @@ def foreground_extraction(frame_list, lr, thr, hist_len):
         hist_len: um número inteiro que representa o histórico de frames considerados
           para o background model
     @return:
-        stack_list: uma lista de imagens, contendo os frames com o plano frontal
+        updated_list: uma lista de imagens, contendo os frames com o plano frontal
           extraído
     Examples:
         >>> foreground_extraction(video_cap, lr = 0.85, thr = 24, hist_len = 15)
@@ -165,6 +163,7 @@ def foreground_extraction(frame_list, lr, thr, hist_len):
     width = int(frame_list[0].shape[1])
     horizontal_disp = int(width/4)
     n = 1
+    updated_list = []
     
     for frame in frame_list:
         fgMask = backSub.apply(frame, learningRate = lr) # aplica o foregorund extractor
@@ -186,9 +185,9 @@ def foreground_extraction(frame_list, lr, thr, hist_len):
         #cv2_imshow(fgMask3) # máscara
         #cv2_imshow(new_frame) # frame reduzido e com máscara aplicada
         if n >= 15: # a partir do 15° frame
-            frame_list.append(new_frame) # adiciona o frame no stack
+            updated_list.append(new_frame) # adiciona o frame no stack
         n += 1
-    return frame_list
+    return updated_list
 
 def grayscale(frames_list):
     """ Esta função recebe uma lista de frames e
@@ -225,10 +224,10 @@ def compute_gradient(frames_list):
     gradient_x_list = [[cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) \
                         for frame in frames_list]] 
     gradient_y_list = [[cv2.Sobel(frame,cv2.CV_64F,0,1,ksize=5) \
-                        for frame in stacked_frames]]
+                        for frame in frames_list]]
     return gradient_x_list, gradient_y_list
 
-def optical_flow(stacked_frames_list):
+def optical_flow(frames_list):
     """ Esta função recebe uma lista com frames empilhados e retorna lista contendo 
     os frames com seus fluxos ópticos na direção X e Y
 
