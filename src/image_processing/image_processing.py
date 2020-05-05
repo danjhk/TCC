@@ -18,6 +18,7 @@ from typing import List, Dict
 # Third-party imports
 # -------------------
 import cv2
+from skimage.measure import label, regionprops
 
 def count_frames(video_cap):
     """ Conta a quantidade de frames de um video
@@ -254,7 +255,7 @@ def optical_flow(stacked_frames_listframes_list):
     opt_y_frames = []
     
     # inicializando parâmetros
-    prev_frame = cv2.cvtColor(frames_list[0], cv2.COLOR_RGB2GRAY)
+    prev_frame = frames_list[0]
     opt_flow_x = np.zeros_like(prev_frame)
     opt_flow_y = np.zeros_like(prev_frame)
     p0 = cv2.goodFeaturesToTrack(prev_frame, mask = None, **corner_detect_params)
@@ -266,7 +267,6 @@ def optical_flow(stacked_frames_listframes_list):
     y_initial = [0 for x in range(len(p0))]
 
     for i in range(1, len(frames_list)):
-      frame = cv2.cvtColor(frames_list[i], cv2.COLOR_RGB2GRAY)
       cp_frame = frame.copy()
       p1, st, err = cv2.calcOpticalFlowPyrLK(prev_frame, frame, p0, None, **lk_params)
       p0r, _st, _err = cv2.calcOpticalFlowPyrLK(frame, prev_frame, p1, None, **lk_params) # backward check
@@ -293,17 +293,20 @@ def optical_flow(stacked_frames_listframes_list):
         cv2.circle(opt_flow_y, (x_initial[n], y_i), 2, (255, 255, 255), -1)
         
         n+=1
-
+        
+      # desenha a linha do fluxo óptico
       cv2.polylines(opt_flow_x, [np.int32(x) for x in opt_x], False, (255, 255, 255))
       cv2.polylines(opt_flow_y, [np.int32(y) for y in opt_y], False, (255, 255, 255))
       
+      # armazena os frames com o fluxo óptico
       opt_x_frames.append(opt_flow_x)
       opt_y_frames.append(opt_flow_y)
       #opt_x_frames.append(cp_frame)
-
+      
+      # reinicializa a matriz de fluxo óptico para o próximo frame
       opt_flow_x = np.zeros_like(prev_frame)
       opt_flow_y = np.zeros_like(prev_frame)
-
+      
       prev_frame = frame.copy()
       p0 = np.float32([tr for tr in tracks]).reshape(-1,1,2)
       
