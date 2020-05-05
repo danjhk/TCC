@@ -160,7 +160,8 @@ def foreground_extraction(frame_list, lr, thr, hist_len):
     backSub = cv2.createBackgroundSubtractorMOG2(detectShadows = False,
                                                 varThreshold = thr, history = hist_len) # Gaussian mixture model para
                                                                         # extração do background
-    height, width = int(frame_list[0].shape)
+    height = int(frame_list[0].shape[0])
+    width = int(frame_list[0].shape[1])
     horizontal_disp = int(width/4)
     n = 1
     
