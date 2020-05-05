@@ -278,11 +278,11 @@ def optical_flow(stacked_frames_list):
       
         for (x_i, y_i), good in zip(p1[st==1].reshape(-1, 2), good_pts):
             if not good: # usa apenas pontos bons
-            continue
+                continue
 
             if i == 1: # 2o frame/1a iteração
-            x_initial[n] = x_i
-            y_initial[n] = y_i
+                x_initial[n] = x_i
+                y_initial[n] = y_i
 
             opt_x[n].append((x_i, y_initial[n]))
             opt_y[n].append((x_initial[n], y_i))
