@@ -116,7 +116,7 @@ def scaling(frames_list, scale):
         dim = (int(height/scale), int(width/scale))
         resize = cv2.resize(frame, dim, interpolation = cv2.INTER_AREA) # downsampling
 
-        frames_list[i] = frame # adiciona o frame no stack
+        frames_list[i] = resize # adiciona o frame no stack
 
         i+= 1 # atualiza contador
     return frames_list
