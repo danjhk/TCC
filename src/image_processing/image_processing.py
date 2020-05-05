@@ -18,6 +18,7 @@ from typing import List, Dict
 # Third-party imports
 # -------------------
 import cv2
+import numpy as np
 from skimage.measure import label, regionprops
 
 def count_frames(video_cap):
