@@ -120,6 +120,28 @@ def scaling(frames_list, scale):
         updated_list.append(res)# adiciona o frame no stack
     return updated_list
 
+def redim_weizmann(weiz_frames_list):
+    """ Essa função redimensiona os frames da base Weizmann, para
+        que possua uma proporção altura/largura = 1.33, igual aos frames da
+        base KTH.
+    Args:
+        weiz_frames_list: lista de frames de um vídeo da base Weizmann
+    @return:
+        weiz_frames_list(list of images): uma lista de imagens, com os frames
+            da base Weizmann com formato (135, 180, 3)
+            
+    Examples:
+        >>> redim_weizmann(weiz_frames_list)
+    """
+    i = 0
+    height = int(weiz_frames_list[0].shape[1])
+    width = int(weiz_frames_list[0].shape[0])
+    for frame in weiz_frames_list:
+        weiz_frames_list[i] = frame[4:width-5, 0:height] # exclui as 4 primeiras colunas da esquerda 
+                                                         # e 5 últimas da direita
+        i += 1
+    return weiz_frames_list
+
 def video2list(video_cap):
     """ Essa função converte um objeto de vídeo para uma lista de frames
     Args:
@@ -295,8 +317,8 @@ def optical_flow(frames_list):
             n+=1
             
         # desenha a linha do fluxo óptico
-        cv2.polylines(opt_flow_x, [np.int32(x) for x in opt_x], False, (255, 255, 255))
-        cv2.polylines(opt_flow_y, [np.int32(y) for y in opt_y], False, (255, 255, 255))
+        cv2.polylines(opt_flow_x, [np.int32(x) for x in opt_x], True, (255, 255, 255), 2)
+        cv2.polylines(opt_flow_y, [np.int32(y) for y in opt_y], True, (255, 255, 255), 2)
         
         # armazena os frames com o fluxo óptico
         opt_x_frames.append(opt_flow_x)
@@ -309,5 +331,6 @@ def optical_flow(frames_list):
         
         prev_frame = frames_list[i].copy()
         p0 = np.float32([tr for tr in tracks]).reshape(-1,1,2)
-      
+        
+    
     return opt_x_frames, opt_y_frames
