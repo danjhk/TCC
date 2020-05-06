@@ -269,7 +269,7 @@ def optical_flow(frames_list):
     y_initial = [0 for x in range(len(p0))]
 
     for i in range(1, len(frames_list)):
-        cp_frame = frame.copy()
+        cp_frame = frames_list[i].copy()
         p1, st, err = cv2.calcOpticalFlowPyrLK(prev_frame, frame, p0, None, **lk_params)
         p0r, _st, _err = cv2.calcOpticalFlowPyrLK(frame, prev_frame, p1, None, **lk_params) # backward check
         d = abs(p0-p0r).reshape(-1,2).max(-1)
@@ -309,7 +309,7 @@ def optical_flow(frames_list):
         opt_flow_x = np.zeros_like(prev_frame)
         opt_flow_y = np.zeros_like(prev_frame)
         
-        prev_frame = frame.copy()
+        prev_frame = frames_list[i].copy()
         p0 = np.float32([tr for tr in tracks]).reshape(-1,1,2)
       
     return opt_x_frames, opt_y_frames
