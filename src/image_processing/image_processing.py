@@ -130,22 +130,22 @@ def video2list(video_cap):
         >>> video2list(video_cap)
     """
     
-    frame_list = []
+    frames_list = []
     while(video_cap.isOpened()):
         # Captura frame por frame
         ret, frame = video_cap.read()
         if ret:
-            frame_list.append(frame)
+            frames_list.append(frame)
         else:
             break
     video_cap.release()
-    return frame_list
+    return frames_list
  
-def foreground_extraction(frame_list, lr, thr, hist_len):
+def foreground_extraction(frames_list, lr, thr, hist_len):
     """ Essa função realiza a extração do plano frontal de um vídeo, e retorna
         uma lista de imagens correspondendo ao frames do mesmo.
     Args:
-        frame_list: lista contendo uma sequência de frames
+        frames_list: lista contendo uma sequência de frames
         lr: um número decimal que representa a taxa de aprendizado
           do algoritmo de subtração
         thr: um número inteiro que representa o limiar para definir a distância
@@ -162,13 +162,13 @@ def foreground_extraction(frame_list, lr, thr, hist_len):
     backSub = cv2.createBackgroundSubtractorMOG2(detectShadows = False,
                                                 varThreshold = thr, history = hist_len) # Gaussian mixture model para
                                                                         # extração do background
-    height = int(frame_list[0].shape[0])
-    width = int(frame_list[0].shape[1])
+    height = int(frames_list[0].shape[0])
+    width = int(frames_list[0].shape[1])
     horizontal_disp = int(width/4)
     n = 1
     updated_list = []
     
-    for frame in frame_list:
+    for frame in frames_list:
         fgMask = backSub.apply(frame, learningRate = lr) # aplica o foregorund extractor
     #     fgMask3 = cv2.cvtColor(fgMask, cv2.COLOR_GRAY2RGB) # transforma máscara p 3 canais RGB
 
@@ -224,11 +224,9 @@ def compute_gradient(frames_list):
             na direção Y dos frames contidos em frames_list
 
     """
-    gradient_x_list = [[cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) \
-                        for frame in frames_list]] 
-    gradient_y_list = [[cv2.Sobel(frame,cv2.CV_64F,0,1,ksize=5) \
-                        for frame in frames_list]]
-    return gradient_x_list, gradient_y_list
+    gradient_x = [cv2.Sobel(frame,cv2.CV_64F,1,0,ksize=5) for frame in frames_list]
+    gradient_y = [cv2.Sobel(frame,cv2.CV_64F,0,1,ksize=5) for frame in frames_list]
+    return gradient_x, gradient_y
 
 def optical_flow(frames_list):
     """ Esta função recebe uma lista com frames empilhados e retorna lista contendo 
