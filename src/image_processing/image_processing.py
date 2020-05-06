@@ -132,10 +132,13 @@ def video2list(video_cap):
     
     frame_list = []
     while(video_cap.isOpened()):
-    # Captura frame por frame
+        # Captura frame por frame
         ret, frame = video_cap.read()
         if ret:
             frame_list.append(frame)
+        else:
+            break
+    video_cap.release()
     return frame_list
  
 def foreground_extraction(frame_list, lr, thr, hist_len):
