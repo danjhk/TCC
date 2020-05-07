@@ -177,7 +177,6 @@ def make_train_test_sets(dataset, filepaths, test_people):
 
     """
     test_set = {}
-    # print(test_people)
     for person, actions_dict in list(filepaths.items()):
         for label, filepath in actions_dict.items():
             if person in test_people:
