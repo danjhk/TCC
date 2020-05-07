@@ -20,6 +20,7 @@ from collections import namedtuple
 # -------------------
 import cv2
 import glob
+import pandas as pd
 
 def get_weizmann_filepaths():
     """ Obtém um dicionário de dicionários referentes ao dataset Weizmann 
