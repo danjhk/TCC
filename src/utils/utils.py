@@ -13,6 +13,7 @@
 # -----------------------------
 import re
 from typing import List, Dict
+from collections import namedtuple
 
 # -------------------
 # Third-party imports
@@ -209,3 +210,24 @@ def make_train_test_sets(dataset, filepaths, test_people):
     Y.close()
     
     return train_set, test_set
+
+def load_dataset(dataset):
+    f1 = f"./TCC/files_and_labels/X_train_{dataset}.txt"
+    f2 = f"./TCC/files_and_labels/Y_train_{dataset}.txt"
+    f3 = f"./TCC/files_and_labels/X_test_{dataset}.txt"
+    f4 = f"./TCC/files_and_labels/Y_test_{dataset}.txt"
+    X_train = make_dataframe_from_filepath(f1, 'video_name')
+    Y_train = make_dataframe_from_filepath(f2, 'class')
+    X_test = make_dataframe_from_filepath(f3, 'video_name')
+    Y_test = make_dataframe_from_filepath(f4, 'class')
+    Sets = namedtuple("Sets", ['x_train', 'y_train', 'x_test', 'y_test'])
+    return Sets(*[X_train, Y_train, X_test, Y_test])
+
+def make_dataframe_from_filepath(filepath, df_column):
+    file = open(filepath, "r")
+    temp = file.read()
+    data = temp.split('\n')
+    df = pd.DataFrame()
+    df[df_column] = data
+    file.close()
+    return df
