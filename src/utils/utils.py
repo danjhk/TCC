@@ -163,3 +163,49 @@ def get_person_filepaths(path, actions_regex_dict):
         if filepaths[key]:
             filepaths[key] = filepaths[key][0]
     return filepaths
+
+def make_train_test_sets(dataset, filepaths, test_people):
+    """ Escreve arquivos txt contendo os nomes dos videos e suas respectivas
+    classes
+
+    Args:
+        dataset: nome do dataset. Ex: 'weizmann' ou 'kth'
+        filepaths: dicionário no formato daquele retornado pelo método get_filepaths
+        test_people: lista de strings contendo os nomes das pessoas que farão parte
+            do conjunto de testes. Ex: ['denis'], ['person10', 'person11']
+
+    """
+    test_set = {}
+    # print(test_people)
+    for person, actions_dict in list(filepaths.items()):
+        for label, filepath in actions_dict.items():
+            if person in test_people:
+                test_set[person] = filepaths.pop(person)
+                break
+
+    X = open(f"X_train_{dataset}.txt", "w")
+    Y = open(f"Y_train_{dataset}.txt", "w")
+    train_set = filepaths
+    for person, actions_dict in train_set.items():
+        for label, filepath in actions_dict.items():
+            if dataset == 'kth':                
+                pattern = re.compile("[^_]*")
+                label = re.search(pattern, label).group(0)
+            X.write(f"{filepath}\n")
+            Y.write(f"{label}\n")
+    X.close()
+    Y.close()
+    
+    X = open(f"X_test_{dataset}.txt", "w")
+    Y = open(f"Y_test_{dataset}.txt", "w")
+    for person, actions_dict in test_set.items():
+        for label, filepath in actions_dict.items():        
+            if dataset == 'kth':                
+                pattern = re.compile("[^_]*")
+                label = re.search(pattern, label).group(0)
+            X.write(f"{filepath}\n")
+            Y.write(f"{label}\n")
+    X.close()
+    Y.close()
+    
+    return train_set, test_set
