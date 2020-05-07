@@ -73,7 +73,6 @@ boxing
 handclapping
 running
 handclapping
-handclapping
 handwaving
 jogging
 running
