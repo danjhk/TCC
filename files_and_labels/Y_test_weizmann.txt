@@ -1,0 +1,10 @@
+walk
+wave2
+skip
+jack
+wave1
+run
+pjump
+jump
+bend
+side

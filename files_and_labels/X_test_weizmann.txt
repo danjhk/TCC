@@ -1,0 +1,10 @@
+Weizmann/denis_walk.avi
+Weizmann/denis_wave2.avi
+Weizmann/denis_skip.avi
+Weizmann/denis_jack.avi
+Weizmann/denis_wave1.avi
+Weizmann/denis_run.avi
+Weizmann/denis_pjump.avi
+Weizmann/denis_jump.avi
+Weizmann/denis_bend.avi
+Weizmann/denis_side.avi
