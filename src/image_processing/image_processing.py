@@ -280,7 +280,7 @@ def optical_flow(frames_list):
     prev_frame = frames_list[0]
     opt_flow_x = np.zeros_like(prev_frame)
     opt_flow_y = np.zeros_like(prev_frame)
-    p0, st = cv2.goodFeaturesToTrack(prev_frame, mask = None, **corner_detect_params)
+    p0, st, error = cv2.goodFeaturesToTrack(prev_frame, mask = None, **corner_detect_params)
     
     # variáveis auxiliares
     opt_x = [[] for x in range(len(p0))]
