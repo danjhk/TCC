@@ -298,13 +298,16 @@ def optical_flow(frames_list):
         tracks = []
         n = 0
       
-        for (x_i, y_i), good in zip(p1[st==1].reshape(-1, 2), good_pts):
+        for (x_i, y_i), good, (x0, y0) in zip(p1[st==1].reshape(-1, 2), good_pts, p0[st==1].reshape(-1,2)):
             if not good: # usa apenas pontos bons
                 continue
 
             if i == 1: # 2o frame/1a iteração
                 x_initial[n] = x_i
                 y_initial[n] = y_i
+                if n == 0: # primeiro ponto, cria um frame vazio
+                    opt_flow_initial = np.zeros_like(prev_frame)
+                cv2.circle(opt_flow_initial, (x0, y0), 2, (255,255,255), -1) # marca o ponto inicial
 
             opt_x[n].append((x_i, y_initial[n]))
             opt_y[n].append((x_initial[n], y_i))
@@ -316,6 +319,10 @@ def optical_flow(frames_list):
             
             n+=1
             
+        if i == 1: # 2o frame/1a iteração - insere frames com pontos iniciais
+            opt_x_frames.append(opt_flow_initial)
+            opt_y_frames.append(opt_flow_initial)
+
         # desenha a linha do fluxo óptico
         cv2.polylines(opt_flow_x, [np.int32(x) for x in opt_x], True, (255, 255, 255), 2)
         cv2.polylines(opt_flow_y, [np.int32(y) for y in opt_y], True, (255, 255, 255), 2)
