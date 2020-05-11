@@ -291,8 +291,7 @@ def optical_flow(frames_list):
     #inserindo o primeiro frame (pontos iniciais)
     initial_pts = p0[st == 1].reshape(-1,2)
     opt_flow_initial = np.zeros_like(prev_frame)
-    for pts in initial_pts:
-        x,y = pts.ravel()
+    for (x,y) in initial_pts:
         cv2.circle(opt_flow_initial,(x,y), 2, (255, 255, 255), -1)
     opt_x.append(opt_flow_initial)
     opt_y.append(opt_flow_initial)
