@@ -1,6 +1,13 @@
+''' Implementa arquitetura da CNN3D e seu treinamento
+@package CNN
+
+@author Daniel Kim & Igor Nakamura
+@date Date: 2020-04-17
+
 @verbatim
 @endverbatim 
 '''
+
 # -----------------------------
 # Standard library dependencies
 # -----------------------------
