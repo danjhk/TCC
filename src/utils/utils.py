@@ -212,6 +212,18 @@ def make_train_test_sets(dataset, filepaths, test_people):
     return train_set, test_set
 
 def load_dataset(dataset):
+    """ Lê os arquivos txt relacionados aos conjuntos de dados
+    de treino e de teste e os retorna em uma namedtuple
+    
+    Args:
+        dataset: nome do dataset. Ex: 'weizmann' ou 'kth'
+    
+    @return Uma namedtuple cujos campos são X_train, Y_train,
+        X_test e Y_test. Os valores dos campos iniciados com X e
+        com Y são, respectivamente, dataframes contendo os 
+        caminhos para os arquivos de vídeo e as suas respectivas 
+        classes.
+    """
     f1 = f"./TCC/files_and_labels/X_train_{dataset}.txt"
     f2 = f"./TCC/files_and_labels/Y_train_{dataset}.txt"
     f3 = f"./TCC/files_and_labels/X_test_{dataset}.txt"
@@ -223,11 +235,20 @@ def load_dataset(dataset):
     Sets = namedtuple("Sets", ['x_train', 'y_train', 'x_test', 'y_test'])
     return Sets(*[X_train, Y_train, X_test, Y_test])
 
-def make_dataframe_from_filepath(filepath, df_column):
-    file = open(filepath, "r")
+def make_dataframe_from_filepath(txt_filepath, column_header):
+    """ Monta um objeto pandas.DataFrame a partir de um arquivo txt
+    
+    Args:
+        txt_file: caminho para o arquivo txt
+        column_header: cabeçalho da coluna do dataframe
+    
+    @return Um objeto pandas.DataFrame com os dados do arquivo txt
+        e cabeçalho segundo o argumento column_header
+    """
+    file = open(txt_file, "r")
     temp = file.read()
     data = temp.split('\n')
     df = pd.DataFrame()
-    df[df_column] = data
+    df[column_header] = data
     file.close()
     return df
