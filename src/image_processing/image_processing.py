@@ -30,8 +30,8 @@ def count_frames(video_cap):
     @return num_frames: inteiro contendo a quantidade de frames
 
     Examples:
-        >>> count_frames(video_cap)
-        '84'
+        count_frames(video_cap)
+    \hidecallergraph
     """
     cap = video_cap
     if (cap.isOpened()== False): 
@@ -50,6 +50,7 @@ def show_frames(video_cap):
     
     Examples:
         >>> show_frames(video_cap)
+    \hidecallergraph
     """
     
     cap = video_cap
@@ -73,7 +74,7 @@ def stack_frames(frames_list, frames_per_stack):
     quantidade de "frames_per_stack" de frames
 
     Args:
-        frames_list: sequência de frames a ser agrupada
+        frames_list: lista contendo uma sequência de frames
         frames_per_stack: quantidade de frames por lista
     
     @return stacked_frames_list: lista de listas de imagens, 
@@ -81,6 +82,7 @@ def stack_frames(frames_list, frames_per_stack):
     
     Examples:
         >>> stack_frames(frames_list, 9)
+    \hidecallergraph
     """        
     num_frames = len(frames_list)
     num_stacks = num_frames - frames_per_stack + 1
@@ -97,17 +99,17 @@ def stack_frames(frames_list, frames_per_stack):
 
 def scaling(frames_list, scale):
     """ Essa função realiza reduz a escala dos frames por um fator determinado.
+
     Args:
-        frames_list: uma lista de imagens, correspondendo
-            aos frames de um vídeo
+        frames_list: lista contendo uma sequência de frames
         scale: inteiro que indica a escala a ser aplicada no redimensionamento
             dos frames. Ex: 2, para escalar a imagem para a metade do tamanho original
-    @return:
-        updated_list(list of images): uma lista de imagens, com os frames na escala
-            especificada
+
+    @return updated_list: uma lista de imagens, com os frames na escala especificada
             
     Examples:
         >>> scaling(frames_list, 2)
+    \hidecallergraph
     """
     height , width, channels =  frames_list[0].shape
     dim = (int(height/scale), int(width/scale))
@@ -124,14 +126,16 @@ def redim_weizmann(weiz_frames_list):
     """ Essa função redimensiona os frames da base Weizmann, para
         que possua uma proporção altura/largura = 1.33, igual aos frames da
         base KTH.
+
     Args:
         weiz_frames_list: lista de frames de um vídeo da base Weizmann
-    @return:
-        weiz_frames_list(list of images): uma lista de imagens, com os frames
-            da base Weizmann com formato (135, 180, 3)
+        
+    @return weiz_frames_list: uma lista de imagens, com os frames 
+        da base Weizmann com formato (135, 180, 3)
             
     Examples:
         >>> redim_weizmann(weiz_frames_list)
+    \hidecallergraph
     """
     i = 0
     height = int(weiz_frames_list[0].shape[1])
@@ -144,12 +148,15 @@ def redim_weizmann(weiz_frames_list):
 
 def video2list(video_cap):
     """ Essa função converte um objeto de vídeo para uma lista de frames
+
     Args:
         video_cap: sequência de frames de um vídeo
-    @return:
-        frames_list: lista contendo os frames do vídeo
+
+    @return frames_list: lista contendo os frames do vídeo
+
     Examples:
         >>> video2list(video_cap)
+    \hidecallergraph
     """
     
     frames_list = []
@@ -166,6 +173,7 @@ def video2list(video_cap):
 def foreground_extraction(frames_list, lr, thr, hist_len):
     """ Essa função realiza a extração do plano frontal de um vídeo, e retorna
         uma lista de imagens correspondendo ao frames do mesmo.
+
     Args:
         frames_list: lista contendo uma sequência de frames
         lr: um número decimal que representa a taxa de aprendizado
@@ -174,11 +182,12 @@ def foreground_extraction(frames_list, lr, thr, hist_len):
           máxima ao qual um pixel ainda é considerado como pertencente ao fundo
         hist_len: um número inteiro que representa o histórico de frames considerados
           para o background model
-    @return:
-        updated_list: uma lista de imagens, contendo os frames com o plano frontal
-          extraído
+
+    @return updated_list: uma lista de imagens, contendo os frames com o plano frontal extraído
+
     Examples:
         >>> foreground_extraction(video_cap, lr = 0.85, thr = 24, hist_len = 15)
+    \hidecallergraph
     """
 
     backSub = cv2.createBackgroundSubtractorMOG2(detectShadows = False,
@@ -218,13 +227,13 @@ def grayscale(frames_list):
     """ Esta função recebe uma lista de frames e
         retorna uma lista contendo os frames em tons de cinza
     Args:
-        stacked_frames_list: uma lista de imagens, correspondendo
-            aos frames de um vídeo
+        frames_list: lista contendo uma sequência de frames
         
-    @return:
-        frames_grayscale: uma lista de imagens, com os frames em escalas de cinza
-    Examples:
+    @return frames_grayscale: uma lista de imagens, com os frames em escalas de cinza
+
+    Examples: 
         >>> grayscale(frames_list)
+    \hidecallergraph
     """    
     stacked_grayscale = [cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY) \
                             for frame in frames_list] 
@@ -236,8 +245,7 @@ def compute_gradient(frames_list):
     uma lista contendo os frames com seus gradientes na direção X e Y
     
     Args:
-        frames_list: uma lista de imagens, correspondendo os frames
-            empilhados de um vídeo
+        frames_list: lista contendo uma sequência de frames
     
     Multiple return: 
         gradient_x_list: uma lista de imagens, contendo o gradiente
@@ -255,8 +263,7 @@ def optical_flow(frames_list):
     os frames com seus fluxos ópticos na direção X e Y
 
     Args:
-        stacked_frames_list: uma lista de imagens, correspondendo
-            aos frames empilhados de um vídeo
+        frames_list: lista contendo uma sequência de frames
         
     Multiple return:
         opt_x_frames: uma lista de imagens, contendo o fluxo óptico

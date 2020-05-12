@@ -166,6 +166,47 @@ def get_person_filepaths(path, actions_regex_dict):
             filepaths[key] = filepaths[key][0]
     return filepaths
 
+def load_dataset(dataset):
+    """ Lê os arquivos txt relacionados aos conjuntos de dados
+    de treino e de teste e os retorna em uma namedtuple
+    
+    Args:
+        dataset: nome do dataset. Ex: 'weizmann' ou 'kth'
+    
+    @return Uma namedtuple cujos campos são X_train, Y_train,
+        X_test e Y_test. Os valores dos campos iniciados com X e
+        com Y são, respectivamente, dataframes contendo os caminhos 
+        para os arquivos de vídeo e as suas respectivas classes.
+    """
+    f1 = f"./TCC/files_and_labels/X_train_{dataset}.txt"
+    f2 = f"./TCC/files_and_labels/Y_train_{dataset}.txt"
+    f3 = f"./TCC/files_and_labels/X_test_{dataset}.txt"
+    f4 = f"./TCC/files_and_labels/Y_test_{dataset}.txt"
+    X_train = make_dataframe_from_filepath(f1, 'video_name')
+    Y_train = make_dataframe_from_filepath(f2, 'class')
+    X_test = make_dataframe_from_filepath(f3, 'video_name')
+    Y_test = make_dataframe_from_filepath(f4, 'class')
+    Sets = namedtuple("Sets", ['x_train', 'y_train', 'x_test', 'y_test'])
+    return Sets(*[X_train, Y_train, X_test, Y_test])
+
+def make_dataframe_from_filepath(txt_filepath, column_header):
+    """ Monta um objeto pandas.DataFrame a partir de um arquivo txt
+    
+    Args:
+        txt_filepath: caminho para o arquivo txt
+        column_header: cabeçalho da coluna do dataframe
+    
+    @return Um objeto pandas.DataFrame com os dados do arquivo txt
+        e cabeçalho segundo o argumento column_header
+    """
+    file = open(txt_filepath, "r")
+    temp = file.read()
+    data = temp.split('\n')
+    df = pd.DataFrame()
+    df[column_header] = data
+    file.close()
+    return df
+
 def make_train_test_sets(dataset, filepaths, test_people):
     """ Escreve arquivos txt contendo os nomes dos videos e suas respectivas
     classes
@@ -175,7 +216,7 @@ def make_train_test_sets(dataset, filepaths, test_people):
         filepaths: dicionário no formato daquele retornado pelo método get_filepaths
         test_people: lista de strings contendo os nomes das pessoas que farão parte
             do conjunto de testes. Ex: ['denis'], ['person10', 'person11']
-
+    \hidecallgraph
     """
     test_set = {}
     for person, actions_dict in list(filepaths.items()):
@@ -210,45 +251,3 @@ def make_train_test_sets(dataset, filepaths, test_people):
     Y.close()
     
     return train_set, test_set
-
-def load_dataset(dataset):
-    """ Lê os arquivos txt relacionados aos conjuntos de dados
-    de treino e de teste e os retorna em uma namedtuple
-    
-    Args:
-        dataset: nome do dataset. Ex: 'weizmann' ou 'kth'
-    
-    @return Uma namedtuple cujos campos são X_train, Y_train,
-        X_test e Y_test. Os valores dos campos iniciados com X e
-        com Y são, respectivamente, dataframes contendo os 
-        caminhos para os arquivos de vídeo e as suas respectivas 
-        classes.
-    """
-    f1 = f"./TCC/files_and_labels/X_train_{dataset}.txt"
-    f2 = f"./TCC/files_and_labels/Y_train_{dataset}.txt"
-    f3 = f"./TCC/files_and_labels/X_test_{dataset}.txt"
-    f4 = f"./TCC/files_and_labels/Y_test_{dataset}.txt"
-    X_train = make_dataframe_from_filepath(f1, 'video_name')
-    Y_train = make_dataframe_from_filepath(f2, 'class')
-    X_test = make_dataframe_from_filepath(f3, 'video_name')
-    Y_test = make_dataframe_from_filepath(f4, 'class')
-    Sets = namedtuple("Sets", ['x_train', 'y_train', 'x_test', 'y_test'])
-    return Sets(*[X_train, Y_train, X_test, Y_test])
-
-def make_dataframe_from_filepath(txt_filepath, column_header):
-    """ Monta um objeto pandas.DataFrame a partir de um arquivo txt
-    
-    Args:
-        txt_file: caminho para o arquivo txt
-        column_header: cabeçalho da coluna do dataframe
-    
-    @return Um objeto pandas.DataFrame com os dados do arquivo txt
-        e cabeçalho segundo o argumento column_header
-    """
-    file = open(txt_file, "r")
-    temp = file.read()
-    data = temp.split('\n')
-    df = pd.DataFrame()
-    df[column_header] = data
-    file.close()
-    return df
