@@ -303,17 +303,11 @@ def optical_flow(frames_list):
     for i in range(1, len(frames_list)):
         cp_frame = frames_list[i].copy()
         p1, st, err = cv2.calcOpticalFlowPyrLK(prev_frame, cp_frame, p0, None, **lk_params)
-        p0r, _st, _err = cv2.calcOpticalFlowPyrLK(cp_frame, prev_frame, p1, None, **lk_params) # backward check
-        d = abs(p0-p0r).reshape(-1,2).max(-1)
-        good_pts = d < 1 # pontos correspondentes com distância pequena após backward check
 
         tracks = []
         n = 0
       
-        for (x_i, y_i), good, (x0, y0) in zip(p1[st==1].reshape(-1, 2), good_pts, p0[st==1].reshape(-1,2)):
-            if not good: # usa apenas pontos bons
-                continue
-
+        for (x_i, y_i), (x0, y0) in zip(p1[st==1].reshape(-1, 2), p0[st==1].reshape(-1,2)):
             if i == 1: # 2o frame/1a iteração
                 x_initial[n] = x_i
                 y_initial[n] = y_i
