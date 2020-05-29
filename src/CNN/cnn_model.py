@@ -1,5 +1,6 @@
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Conv2D, Conv3D, MaxPooling3D, Flatten, Dropout, Reshape
+import numpy as np
 
 def get_model(input_shape, num_classes):
     model = Sequential([
