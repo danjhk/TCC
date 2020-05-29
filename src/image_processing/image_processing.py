@@ -278,7 +278,7 @@ def optical_flow(frames_list):
     """    
     corner_detect_params = dict( maxCorners = 100,
                         qualityLevel = 0.2,
-                        minDistance = 7,
+                        minDistance = 2,
                         blockSize = 7 )
     lk_params = dict( winSize  = (15,15),
                     maxLevel = 0,
