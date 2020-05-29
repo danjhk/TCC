@@ -198,7 +198,7 @@ def foreground_extraction(frames_list, lr, thr, hist_len):
     horizontal_disp = int(width/4)
     n = 1
     updated_list = []
-    
+    last_good_column = int(width/2)
     for frame in frames_list:
         fgMask = backSub.apply(frame, learningRate = lr) # aplica o foregorund extractor
     #     fgMask3 = cv2.cvtColor(fgMask, cv2.COLOR_GRAY2RGB) # transforma máscara p 3 canais RGB
@@ -211,10 +211,14 @@ def foreground_extraction(frames_list, lr, thr, hist_len):
         for i in range(len(props)):
             if (props[i].area > max) and (props[i].area > 40):
                 max = props[i].area
-                row = int(props[i].centroid[1])
+                column = int(props[i].centroid[1])
 
         mask = np.zeros(frame.shape, dtype=np.uint8)
-        mask[0:height,row-horizontal_disp:row+horizontal_disp] = 255
+        if (column-horizontal_disp <0 or column+horizontal_disp> width):
+            column = last_good_column
+        else:
+            last_good_column = column
+        mask[0:height,column-horizontal_disp:column+horizontal_disp] = 255
         new_frame = cv2.bitwise_and(frame, mask) # aplica operador lógico AND bit a bit (pixel a pixel)
         #cv2_imshow(fgMask3) # máscara
         #cv2_imshow(new_frame) # frame reduzido e com máscara aplicada
@@ -298,16 +302,16 @@ def optical_flow(frames_list):
     for i in range(1, len(frames_list)):
         cp_frame = frames_list[i].copy()
         p1, st, err = cv2.calcOpticalFlowPyrLK(prev_frame, cp_frame, p0, None, **lk_params)
-        #p0r, _st, _err = cv2.calcOpticalFlowPyrLK(cp_frame, prev_frame, p1, None, **lk_params) # backward check
-        #d = abs(p0-p0r).reshape(-1,2).max(-1)
-        #good_pts = d < 1 # pontos correspondentes com distância pequena após backward check
+        p0r, _st, _err = cv2.calcOpticalFlowPyrLK(cp_frame, prev_frame, p1, None, **lk_params) # backward check
+        d = abs(p0-p0r).reshape(-1,2).max(-1)
+        good_pts = d < 1 # pontos correspondentes com distância pequena após backward check
 
         tracks = []
         n = 0
       
-        for (x_i, y_i), (x0, y0) in zip(p1[st==1].reshape(-1, 2), p0[st==1].reshape(-1,2)):
-            #if not good: # usa apenas pontos bons
-             #   continue
+        for (x_i, y_i), good, (x0, y0) in zip(p1[st==1].reshape(-1, 2), good_pts, p0[st==1].reshape(-1,2)):
+            if not good: # usa apenas pontos bons
+                continue
 
             if i == 1: # 2o frame/1a iteração
                 x_initial[n] = x_i
