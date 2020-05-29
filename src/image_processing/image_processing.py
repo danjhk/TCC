@@ -218,6 +218,7 @@ def foreground_extraction(frames_list, lr, thr, hist_len):
             column = last_good_column
         else:
             last_good_column = column
+        
         mask[0:height,column-horizontal_disp:column+horizontal_disp] = 255
         new_frame = cv2.bitwise_and(frame, mask) # aplica operador lógico AND bit a bit (pixel a pixel)
         #cv2_imshow(fgMask3) # máscara
