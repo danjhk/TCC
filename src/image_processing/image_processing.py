@@ -352,3 +352,41 @@ def optical_flow(frames_list):
         
     
     return opt_x_frames, opt_y_frames
+
+def stack_channels(gray_channel, gradient_x_channel, gradient_y_channel, opt_x_channel, opt_y_channel):
+    stacked_channels = []
+    stacked_channels.append(gray_channel)
+    stacked_channels.append(gradient_x_channel)
+    stacked_channels.append(gradient_y_channel)
+    stacked_channels.append(opt_x_channel)
+    stacked_channels.append(opt_y_channel)
+    return np.array(stacked_channels)
+
+def preprocess(filepath, dataset, stacks_per_list):
+
+    cap = cv2.VideoCapture(filepath)
+
+    frames_list = video2list(cap)
+    if dataset == 'Weizmann':
+        frames_list = redim_weizmann(frames_list)
+        scaled_frames = scaling(frames_list, 2.25)
+    elif dataset == 'KTH':
+        scaled_frames = scaling(frames_list, 2)
+    frames_fg = foreground_extraction(scaled_frames, lr = 0.85, thr = 24, hist_len = 15)
+
+    gray_frames = grayscale(frames_fg)
+
+    gradient_x, gradient_y = compute_gradient(gray_frames)
+
+    optical_flow_x, optical_flow_y = optical_flow(gray_frames)
+
+    stacked_gray = stack_frames(gray_frames, stacks_per_list)
+
+    stacked_gradient_x = stack_frames(gradient_x, stacks_per_list)
+    stacked_gradient_y = stack_frames(gradient_y, stacks_per_list)
+
+    stacked_optical_flow_x = stack_frames(optical_flow_x, stacks_per_list)
+    stacked_optical_flow_y = stack_frames(optical_flow_y, stacks_per_list)
+
+    preprocessed_frames_tuple = (stacked_gray, stacked_gradient_x, stacked_gradient_y, stacked_optical_flow_x, stacked_optical_flow_y)
+    return preprocessed_frames_tuple
