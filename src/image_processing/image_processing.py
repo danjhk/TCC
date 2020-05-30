@@ -378,13 +378,12 @@ def preprocess(filepath, dataset, stacks_per_list):
     frames_fg = foreground_extraction(scaled_frames, lr = 0.85, thr = 24, hist_len = 15)
 
     gray_frames = grayscale(frames_fg)
-    gray_frames = normalize_frames(gray_frames)
-
     gradient_x, gradient_y = compute_gradient(gray_frames)
+    optical_flow_x, optical_flow_y = optical_flow(gray_frames)
+
+    gray_frames = normalize_frames(gray_frames)
     gradient_x = normalize_frames(gradient_x)
     gradient_y = normalize_frames(gradient_y)
-
-    optical_flow_x, optical_flow_y = optical_flow(gray_frames)
     optical_flow_x = normalize_frames(optical_flow_x)
     optical_flow_y = normalize_frames(optical_flow_y)
 
