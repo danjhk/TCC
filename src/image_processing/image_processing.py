@@ -357,6 +357,14 @@ def stack_channels(gray_channel, gradient_x_channel, gradient_y_channel, opt_x_c
     stacked_channels.append(opt_y_channel)
     return np.array(stacked_channels)
 
+def normalize_frames(frames_list):
+    if np.absolute(np.max(frames_list)) > np.absolute(np.min(frames_list)):
+        normalizer = np.max(frames_list)
+    else:
+        normalizer = np.min(frames_list)
+    normalized_frames = np.array(frames_list).astype('float32') / abs(normalizer)
+    return normalized_frames
+
 def preprocess(filepath, dataset, stacks_per_list):
 
     cap = cv2.VideoCapture(filepath)
@@ -370,10 +378,15 @@ def preprocess(filepath, dataset, stacks_per_list):
     frames_fg = foreground_extraction(scaled_frames, lr = 0.85, thr = 24, hist_len = 15)
 
     gray_frames = grayscale(frames_fg)
+    gray_frames = normalize_frames(gray_frames)
 
     gradient_x, gradient_y = compute_gradient(gray_frames)
+    gradient_x = normalize_frames(gradient_x)
+    gradient_y = normalize_frames(gradient_y)
 
     optical_flow_x, optical_flow_y = optical_flow(gray_frames)
+    optical_flow_x = normalize_frames(optical_flow_x)
+    optical_flow_y = normalize_frames(optical_flow_y)
 
     stacked_gray = stack_frames(gray_frames, stacks_per_list)
 
