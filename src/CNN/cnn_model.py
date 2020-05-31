@@ -22,7 +22,7 @@ def train_network(model, X, y, epochs, batches):
     history = model.fit(X,
                         y,
                         verbose=1,
-                        epochs=epochs, batches = batches)
+                        epochs=epochs, batch_size = batches)
     return history
 
 def evaluate_acc(model, x_test, y_test, num_classes, stacks_per_list):
