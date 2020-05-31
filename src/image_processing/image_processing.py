@@ -371,7 +371,10 @@ def preprocess(x_train, y_train, dataset, stacks_per_list):
     final_y_train = []
 
     for i in range(x_train.shape[0]):
-        cap = cv2.VideoCapture(x_train.iloc[i].item())
+        if x_train.shape[0] == 1:
+            cap = cv2.VideoCapture(x_train.iloc[i])
+        else:
+            cap = cv2.VideoCapture(x_train.iloc[i].item())
 
         frames_list = video2list(cap)
         if dataset == 'Weizmann':
@@ -404,7 +407,10 @@ def preprocess(x_train, y_train, dataset, stacks_per_list):
             stacked_channels = stack_channels(*preprocessed_frames)
             stacked_channels = np.transpose(stacked_channels, (2, 3, 1, 0))
             final_x_train.append(stacked_channels)
-            final_y_train.append(y_train.iloc[i].values)
+            if x_train.shape[0] == 1:
+                final_y_train.append(y_train.iloc[i])
+            else:    
+                final_y_train.append(y_train.iloc[i].values)
     final_x_train = np.array(final_x_train)
     final_y_train = np.array(final_y_train)
     return final_x_train, final_y_train
