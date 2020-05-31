@@ -365,35 +365,46 @@ def normalize_frames(frames_list):
     normalized_frames = np.array(frames_list).astype('float32') / abs(normalizer)
     return normalized_frames
 
-def preprocess(filepath, dataset, stacks_per_list):
+def preprocess(x_train, y_train, dataset, stacks_per_list):
 
-    cap = cv2.VideoCapture(filepath)
+    final_x_train = []
+    final_y_train = []
 
-    frames_list = video2list(cap)
-    if dataset == 'Weizmann':
-        frames_list = redim_weizmann(frames_list)
-        scaled_frames = scaling(frames_list, 2.25)
-    elif dataset == 'KTH':
-        scaled_frames = scaling(frames_list, 2)
-    frames_fg = foreground_extraction(scaled_frames, lr = 0.85, thr = 24, hist_len = 15)
+    for i in range(x_train.shape[0]):
+        cap = cv2.VideoCapture(x_train.iloc[i].item())
 
-    gray_frames = grayscale(frames_fg)
-    gradient_x, gradient_y = compute_gradient(gray_frames)
-    optical_flow_x, optical_flow_y = optical_flow(gray_frames)
+        frames_list = video2list(cap)
+        if dataset == 'Weizmann':
+            frames_list = redim_weizmann(frames_list)
+            scaled_frames = scaling(frames_list, 2.25)
+        elif dataset == 'KTH':
+            scaled_frames = scaling(frames_list, 2)
+        frames_fg = foreground_extraction(scaled_frames, lr = 0.85, thr = 24, hist_len = 15)
 
-    gray_frames = normalize_frames(gray_frames)
-    gradient_x = normalize_frames(gradient_x)
-    gradient_y = normalize_frames(gradient_y)
-    optical_flow_x = normalize_frames(optical_flow_x)
-    optical_flow_y = normalize_frames(optical_flow_y)
+        gray_frames = grayscale(frames_fg)
+        gradient_x, gradient_y = compute_gradient(gray_frames)
+        optical_flow_x, optical_flow_y = optical_flow(gray_frames)
 
-    stacked_gray = stack_frames(gray_frames, stacks_per_list)
+        gray_frames = normalize_frames(gray_frames)
+        gradient_x = normalize_frames(gradient_x)
+        gradient_y = normalize_frames(gradient_y)
+        optical_flow_x = normalize_frames(optical_flow_x)
+        optical_flow_y = normalize_frames(optical_flow_y)
 
-    stacked_gradient_x = stack_frames(gradient_x, stacks_per_list)
-    stacked_gradient_y = stack_frames(gradient_y, stacks_per_list)
+        stacked_gray = stack_frames(gray_frames, stacks_per_list)
 
-    stacked_optical_flow_x = stack_frames(optical_flow_x, stacks_per_list)
-    stacked_optical_flow_y = stack_frames(optical_flow_y, stacks_per_list)
+        stacked_gradient_x = stack_frames(gradient_x, stacks_per_list)
+        stacked_gradient_y = stack_frames(gradient_y, stacks_per_list)
 
-    preprocessed_frames_tuple = (stacked_gray, stacked_gradient_x, stacked_gradient_y, stacked_optical_flow_x, stacked_optical_flow_y)
-    return preprocessed_frames_tuple
+        stacked_optical_flow_x = stack_frames(optical_flow_x, stacks_per_list)
+        stacked_optical_flow_y = stack_frames(optical_flow_y, stacks_per_list)
+
+        preprocessed_frames_tuple = (stacked_gray, stacked_gradient_x, stacked_gradient_y, stacked_optical_flow_x, stacked_optical_flow_y)
+        for preprocessed_frames in zip(*preprocessed_frames_tuple):
+            stacked_channels = stack_channels(*preprocessed_frames)
+            stacked_channels = np.transpose(stacked_channels, (2, 3, 1, 0))
+            x_train.append(stacked_channels)
+            y_train.append(w.y_train.iloc[i].values)
+    final_x_train = np.array(final_x_train)
+    final_y_train = np.array(final_y_train)
+    return final_x_train, final_y_train
