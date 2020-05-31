@@ -403,8 +403,8 @@ def preprocess(x_train, y_train, dataset, stacks_per_list):
         for preprocessed_frames in zip(*preprocessed_frames_tuple):
             stacked_channels = stack_channels(*preprocessed_frames)
             stacked_channels = np.transpose(stacked_channels, (2, 3, 1, 0))
-            x_train.append(stacked_channels)
-            y_train.append(w.y_train.iloc[i].values)
+            final_x_train.append(stacked_channels)
+            final_y_train.append(y_train.iloc[i].values)
     final_x_train = np.array(final_x_train)
     final_y_train = np.array(final_y_train)
     return final_x_train, final_y_train

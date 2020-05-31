@@ -13,14 +13,14 @@ def get_model(input_shape, num_classes):
         Flatten(),
         Dense(num_classes, activation='softmax', name='dense-softmax')
     ])
-    model.compile(optimizer='adam',
+    model.compile(optimizer='sgd',
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
     return model
 
-def train_network(model, X, y):
-    history = model.fit(X[np.newaxis,...],
-                        y[np.newaxis,...],
+def train_network(model, X, y, epochs, batches):
+    history = model.fit(X,
+                        y,
                         verbose=1,
                         epochs=1)
-    return model, history
+    return history
