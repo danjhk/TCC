@@ -1,0 +1,4 @@
+Custom/person08_walk_left.avi
+Custom/person08_run_right.avi
+Custom/person08_walk_right.avi
+Custom/person08_run_left.avi
