@@ -45,8 +45,22 @@ def get_kth_filepaths():
     person_kth = 'person01'
     action_kth = 'boxing_d1_uncomp'
     names_list_kth = create_names_list(path_kth, action_kth)
-    actions_list_kth = create_actions_list(path_kth, person_kth)            
+    actions_list_kth = create_actions_list(path_kth, person_kth)
     return(get_filepaths(path_kth, names_list_kth, actions_list_kth))
+
+def get_kth_edited_filepaths():
+    """ Obtém um dicionário de dicionários referentes ao dataset KTH-editado
+    como descrito em get_filepaths
+
+    @return Um dicionário de dicionários
+    """
+    path_edited = r'KTH-edited/'
+    person_edited = 'person01'
+    action_edited = 'jogging'
+    names_list_edited = create_names_list(path_edited, action_edited)
+    actions_list_edited = create_actions_list(path_edited, person_edited)
+    return get_filepaths(path_edited, names_list_edited, actions_list_edited)
+
 
 def create_names_list(path, action):
     """ Obtém a lista dos nomes das pessoas que executam as ações 
