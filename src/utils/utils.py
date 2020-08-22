@@ -230,24 +230,24 @@ def make_train_test_sets(dataset, filepaths, test_people):
     train_set = filepaths
     for person, actions_dict in train_set.items():
         for label, filepath in actions_dict.items():
-            if dataset == 'kth':                
+            if dataset.lower().startswith('kth'):
                 pattern = re.compile("[^_]*")
                 label = re.search(pattern, label).group(0)
             X.write(f"{filepath}\n")
             Y.write(f"{label}\n")
     X.close()
     Y.close()
-    
+
     X = open(f"X_test_{dataset}.txt", "w")
     Y = open(f"Y_test_{dataset}.txt", "w")
     for person, actions_dict in test_set.items():
-        for label, filepath in actions_dict.items():        
-            if dataset == 'kth':                
+        for label, filepath in actions_dict.items():
+            if dataset.lower().startswith('kth'):
                 pattern = re.compile("[^_]*")
                 label = re.search(pattern, label).group(0)
             X.write(f"{filepath}\n")
             Y.write(f"{label}\n")
     X.close()
     Y.close()
-    
+
     return train_set, test_set
