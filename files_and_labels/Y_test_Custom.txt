@@ -1,4 +1,0 @@
-walk_left
-run_right
-walk_right
-run_left
