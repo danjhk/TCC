@@ -490,7 +490,6 @@ handclapping
 handclapping
 handclapping
 handclapping
-<<<<<<< HEAD
 handclapping
 handclapping
 handclapping
@@ -503,25 +502,3 @@ handclapping
 handclapping
 handclapping
 handclapping
-=======
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
-handwaving
->>>>>>> 8237a2bee8cfa36f3460b642c0857b391e1c2988
