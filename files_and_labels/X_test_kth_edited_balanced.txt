@@ -236,7 +236,6 @@ KTH/person12_handclapping_d3_uncomp.avi
 KTH/person12_handclapping_d4_uncomp.avi
 KTH/person13_handclapping_d1_uncomp.avi
 KTH/person13_handclapping_d2_uncomp.avi
-KTH/person13_handclapping_d3_uncomp.avi
 KTH/person13_handclapping_d4_uncomp.avi
 KTH/person14_handclapping_d1_uncomp.avi
 KTH/person14_handclapping_d2_uncomp.avi
