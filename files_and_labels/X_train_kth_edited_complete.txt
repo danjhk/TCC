@@ -214,7 +214,7 @@ KTH-edited/person15_running_d4_uncomp_Trim.avi
 KTH-edited/person15_running_d4_uncomp_Trim(2).avi
 KTH-edited/person15_running_d4_uncomp_Trim(4).avi
 KTH-edited/person15_running_d3_uncomp_Trim(4).avi
-KTH-edited/person15_walking_d3_uncomp_Trim.avi
+KTH-edited/person15_walking_d3_uncomp_Trim.mp4
 KTH-edited/person15_running_d2_uncomp_Trim(2).avi
 KTH-edited/person15_running_d3_uncomp_Trim(3).avi
 KTH-edited/person15_running_d1_uncomp_Trim.avi
